@@ -1,0 +1,26 @@
+<core:FragmentDefinition
+	class="sapUiSizeCompact"
+	xmlns="sap.m"	
+	xmlns:core="sap.ui.core">
+    <Dialog title="{i18n>grSelectTitle}"
+		type="Message"
+		state="None"
+		resizable="true"
+		draggable="true"
+		initialFocus="grSelectInput"
+		stretch="{= !!${device>/system/phone}}">
+		<content>			
+			<VBox class="sapUiSmallMargin" alignContent="Center">
+				<Label text="{i18n>grSelectLabel}" labelFor="grSelectInput" required="true" tooltip="{i18n>grSelectInputTooltip}"/>
+				<Input id="grSelectInput" value="{viewModel>/grSelectInput}" 
+					placeholder="{i18n>grSelectInputPlaceholder}"					
+					maxLength="10" submit="onGRSelectOK"
+					showValueHelp="true" valueHelpRequest=".onGRValueHelpRequested"/>
+			</VBox>	
+		</content>
+		<buttons>
+			<Button id="grSelectOKButton" text="{i18n>grSelectOKButton}" press="onGRSelectOK" type="Emphasized" />
+			<Button text="{i18n>grSelectCancelButton}" press="onGRSelectCancel" />			
+		</buttons>
+	</Dialog>
+</core:FragmentDefinition>

@@ -1,0 +1,26 @@
+<core:FragmentDefinition
+	class="sapUiSizeCompact"
+	xmlns="sap.m"	
+	xmlns:core="sap.ui.core">
+    <Dialog title="{i18n>poSelectTitle}"
+		type="Message"
+		resizable="true"
+		draggable="true"
+		initialFocus="poSelectInput"
+		stretch="{= !!${device>/system/phone}}">
+		<content>			
+			<VBox class="sapUiSmallMargin" alignContent="Center">
+				<Label text="{i18n>poSelectLabel}" labelFor="poSelectInput" required="true" tooltip="{i18n>poSelectInputTooltip}"/>
+				<Input id="poSelectInput" value="{viewModel>/poSelectInput}" maxLength="10"
+					submit="onPoSelectOK" placeholder="{i18n>vhPlaceHolderCNumber}"
+					showValueHelp="true" valueHelpRequest=".onPOValueHelpRequested"/>
+			</VBox>	
+		</content>
+		<beginButton>
+			<Button id="poSelectOKButton" text="{i18n>poSelectOKButton}" press="onPoSelectOK" type="Emphasized" />
+		</beginButton>
+		<endButton>
+			<Button text="{i18n>poSelectCancelButton}" press="onPoSelectCancel" />			
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

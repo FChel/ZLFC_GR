@@ -1,0 +1,108 @@
+<core:FragmentDefinition
+  class="sapUiSizeCompact"
+  xmlns="sap.m"
+  xmlns:l="sap.ui.layout"
+  xmlns:f="sap.ui.layout.form"
+  xmlns:core="sap.ui.core">
+    <Dialog title="{i18n>poAssetDetailTitle} {AssetNo} - {SubNumber}"
+    type="Message"
+    contentWidth="50%"
+    resizable="true"
+    draggable="true"
+    initialFocus="assetSelect"
+    stretch="{= !!${device>/system/phone}}">
+    <content>
+      <VBox class="sapUiSmallMargin" alignContent="Center">
+        <f:Form editable="true">
+          <f:layout>
+            <f:ResponsiveGridLayout
+              columnsXL="2"
+              columnsL="2"
+              columnsM="2"
+              singleContainerFullSize="true">
+            </f:ResponsiveGridLayout>
+          </f:layout>
+          <f:formContainers>
+            <f:FormContainer>
+              <f:formElements>
+                <f:FormElement label="{i18n>ccLabel}">
+                  <f:fields>
+                    <Input value="{Costcenter}" editable="false"/>
+                  </f:fields>
+                </f:FormElement>
+              </f:formElements>
+            </f:FormContainer>
+            <f:FormContainer>
+              <f:formElements>
+                <f:FormElement label="{i18n>locationLabel}">
+                  <f:fields>
+                    <Input value="{Location}" editable="false" />
+                  </f:fields>
+                </f:FormElement>
+              </f:formElements>
+            </f:FormContainer>
+          </f:formContainers>
+        </f:Form>
+        <f:Form editable="true">
+          <f:title>
+            <core:Title text="{i18n>assetDetailsTitle}" />
+          </f:title>
+          <f:layout>
+            <f:ResponsiveGridLayout
+              columnsXL="2"
+              columnsL="2"
+              columnsM="2"
+              singleContainerFullSize="true">
+            </f:ResponsiveGridLayout>
+          </f:layout>
+          <f:formContainers>
+            <f:FormContainer>
+              <f:formElements>
+                <f:FormElement visible="{= !${MainDescriptOff}}" label="{i18n>assetDescriptionLabel}">
+                  <f:fields>
+                    <Input value="{MainDescript}" maxLength="50" />
+                  </f:fields>
+                </f:FormElement>
+                <f:FormElement visible="{= !${NoteOff}}" label="{i18n>inventoryNoteLabel}">
+                  <f:fields>
+                    <Input value="{Note}" maxLength="15"/>
+                  </f:fields>
+                </f:FormElement>
+                <f:FormElement visible="{= !${InventNoOff}}" label="{i18n>inventoryNumberLabel}">
+                  <f:fields>
+                    <Input value="{InventNo}" maxLength="25" />
+                  </f:fields>
+                </f:FormElement>
+              </f:formElements>
+            </f:FormContainer>
+            <f:FormContainer>
+              <f:formElements>
+                <f:FormElement visible="{= !${SerialNoOff}}" label="{i18n>serialNoLabel}">
+                  <f:fields>
+                    <Input value="{SerialNo}" maxLength="18" />
+                  </f:fields>
+                </f:FormElement>
+                <f:FormElement visible="{= !${PlateNoOff}}" label="{i18n>licencePlateNoLabel}">
+                  <f:fields>
+                    <Input value="{PlateNo}" maxLength="15" />
+                  </f:fields>
+                </f:FormElement>
+                <f:FormElement visible="{= !${RoomOff}}" label="{i18n>roomLabel}">
+                  <f:fields>
+                    <Input value="{Room}" maxLength="8" editable="{= !${RoomLocked}}" />
+                  </f:fields>
+                </f:FormElement>
+              </f:formElements>
+            </f:FormContainer>
+          </f:formContainers>
+        </f:Form>
+      </VBox>
+    </content>
+    <beginButton>
+      <Button id="assetDetailUpdateButton" enabled="{= ${disableModel>/DisableFlag} !== true}" text="{i18n>assetDetailUpdateButton}" press="onAssetDetailUpdate" type="Emphasized" />
+    </beginButton>
+    <endButton>
+      <Button text="{i18n>assetDetailCancelButton}" press="onAssetDetailCancel" />
+    </endButton>
+  </Dialog>
+</core:FragmentDefinition>

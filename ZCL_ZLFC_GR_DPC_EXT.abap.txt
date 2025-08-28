@@ -1,0 +1,2195 @@
+class ZCL_ZLFC_GR_DPC_EXT definition
+  public
+  inheriting from ZCL_ZLFC_GR_DPC
+  create public .
+
+public section.
+
+  constants AC_TAXAU type KALSM_D value 'TAXAU' ##NO_TEXT.
+  constants AC_STANDARD_PO type ESART value 'NB' ##NO_TEXT.
+  constants AC_AP_NAME type SYST_MSGV value 'your local procurement area' ##NO_TEXT.
+  constants AC_AP_EMAIL type SYST_MSGV value 'roman.purchaseorders@defence.gov.au' ##NO_TEXT.
+
+  methods /IWBEP/IF_MGW_APPL_SRV_RUNTIME~CREATE_DEEP_ENTITY
+    redefinition .
+  methods /IWBEP/IF_MGW_APPL_SRV_RUNTIME~GET_EXPANDED_ENTITY
+    redefinition .
+  methods /IWBEP/IF_MGW_APPL_SRV_RUNTIME~GET_EXPANDED_ENTITYSET
+    redefinition .
+protected section.
+
+  methods ASSETS_GET_ENTITY
+    redefinition .
+  methods USERDETAILS_GET_ENTITYSET
+    redefinition .
+  methods ASSETS_CREATE_ENTITY
+    redefinition .
+private section.
+
+  types:
+    begin of TY_PURCHASEORDER_DEEP.
+      include type zcl_zlfc_gr_mpc=>ts_purchaseorder.
+    types:
+      items type standard table of zcl_zlfc_gr_mpc=>ts_purchaseorderitem with default key,
+      movements type standard table of zcl_zlfc_gr_mpc=>ts_purchaseordermovement with default key,
+      materialdocuments type standard table of zcl_zlfc_gr_mpc=>ts_materialdocument with default key,
+      assets type standard table of zcl_zlfc_gr_mpc=>ts_purchaseorderasset with default key,
+    end of TY_PURCHASEORDER_DEEP .
+  types:
+    begin of TY_GOODSRECEIPT_DEEP.
+      include type zcl_zlfc_gr_mpc=>ts_goodsreceipt.
+    types:
+      items type standard table of zcl_zlfc_gr_mpc=>ts_goodsreceiptitem with default key,
+      materialdocuments type standard table of zcl_zlfc_gr_mpc=>ts_materialdocument with default key,
+    end of TY_GOODSRECEIPT_DEEP .
+  types:
+    begin of ty_po_line,
+      ebelp	type ebelp,
+      effwr	type effwr,
+      LOEKZ	type ELOEK,
+      TXZ01	type TXZ01,
+      NETPR	type BPREI,
+      MWSKZ	type MWSKZ,
+      WEBRE	type WEBRE,
+      KNTTP	type KNTTP,
+    end of ty_po_line .
+  types:
+    begin of ty_mat_line,
+      ZEILE	type MBLPO,
+      SHKZG	type SHKZG,
+    end of ty_mat_line .
+  types:
+    begin of ty_tax_code,
+      mwskz type mwskz,
+      kbetr type kbetr_kond,
+    end of ty_tax_code .
+  types:
+    begin of ty_vim_selected,
+      TAXAMOUNT	  type WMWST,
+      VALUEEXTAX  type BAPICURR_D,
+    end of ty_vim_selected .
+
+  methods _FIELD_IS_OFF
+    importing
+      value(I_FELEI) type FELEI
+      value(I_FEGRU) type FEGRU
+    returning
+      value(R_IS_OFF) type SAP_BOOL .
+  methods _READ_GR
+    importing
+      value(I_MAT_DOC) type MBLNR
+      value(I_DOC_YEAR) type MJAHR
+    returning
+      value(RS_GOODSRECEIPT_DEEP) type TY_GOODSRECEIPT_DEEP
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  methods _CANCEL_GR
+    changing
+      !CS_GOODSRECEIPT_DEEP type TY_GOODSRECEIPT_DEEP .
+  methods _CREATE_GR
+    importing
+      value(I_TEST_MODE) type ABAP_BOOL
+    changing
+      !CS_PURCHASEORDER_DEEP type TY_PURCHASEORDER_DEEP .
+  methods GOODSRECEIPT_GET_EE
+    importing
+      !IV_ENTITY_NAME type STRING optional
+      !IV_ENTITY_SET_NAME type STRING optional
+      !IV_SOURCE_NAME type STRING optional
+      !IT_KEY_TAB type /IWBEP/T_MGW_NAME_VALUE_PAIR optional
+      !IT_NAVIGATION_PATH type /IWBEP/T_MGW_NAVIGATION_PATH optional
+      !IO_EXPAND type ref to /IWBEP/IF_MGW_ODATA_EXPAND optional
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/IF_MGW_REQ_ENTITY optional
+    exporting
+      !ER_ENTITY type ref to DATA
+      !ES_RESPONSE_CONTEXT type /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_ENTITY_CNTXT
+      !ET_EXPANDED_CLAUSES type STRING_TABLE
+      !ET_EXPANDED_TECH_CLAUSES type STRING_TABLE
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  methods PURCHASEORDER_GET_EE
+    importing
+      !IV_ENTITY_NAME type STRING optional
+      !IV_ENTITY_SET_NAME type STRING optional
+      !IV_SOURCE_NAME type STRING optional
+      !IT_KEY_TAB type /IWBEP/T_MGW_NAME_VALUE_PAIR optional
+      !IT_NAVIGATION_PATH type /IWBEP/T_MGW_NAVIGATION_PATH optional
+      !IO_EXPAND type ref to /IWBEP/IF_MGW_ODATA_EXPAND optional
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/IF_MGW_REQ_ENTITY optional
+    exporting
+      !ER_ENTITY type ref to DATA
+      !ES_RESPONSE_CONTEXT type /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_ENTITY_CNTXT
+      !ET_EXPANDED_CLAUSES type STRING_TABLE
+      !ET_EXPANDED_TECH_CLAUSES type STRING_TABLE
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  methods _READ_PO
+    importing
+      value(I_PO_NUMBER) type CHAR12
+    returning
+      value(RS_PURCHASEORDER_DEEP) type TY_PURCHASEORDER_DEEP
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  methods GOODSRECEIPT_SAVE
+    importing
+      !IV_ENTITY_NAME type STRING optional
+      !IV_ENTITY_SET_NAME type STRING optional
+      !IV_SOURCE_NAME type STRING optional
+      !IO_DATA_PROVIDER type ref to /IWBEP/IF_MGW_ENTRY_PROVIDER
+      !IT_KEY_TAB type /IWBEP/T_MGW_NAME_VALUE_PAIR optional
+      !IT_NAVIGATION_PATH type /IWBEP/T_MGW_NAVIGATION_PATH optional
+      !IO_EXPAND type ref to /IWBEP/IF_MGW_ODATA_EXPAND
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/IF_MGW_REQ_ENTITY_C optional
+    exporting
+      !ER_DEEP_ENTITY type ref to DATA
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+  methods PURCHASEORDER_SAVE
+    importing
+      !IV_ENTITY_NAME type STRING optional
+      !IV_ENTITY_SET_NAME type STRING optional
+      !IV_SOURCE_NAME type STRING optional
+      !IO_DATA_PROVIDER type ref to /IWBEP/IF_MGW_ENTRY_PROVIDER
+      !IT_KEY_TAB type /IWBEP/T_MGW_NAME_VALUE_PAIR optional
+      !IT_NAVIGATION_PATH type /IWBEP/T_MGW_NAVIGATION_PATH optional
+      !IO_EXPAND type ref to /IWBEP/IF_MGW_ODATA_EXPAND
+      !IO_TECH_REQUEST_CONTEXT type ref to /IWBEP/IF_MGW_REQ_ENTITY_C optional
+    exporting
+      !ER_DEEP_ENTITY type ref to DATA
+    raising
+      /IWBEP/CX_MGW_BUSI_EXCEPTION
+      /IWBEP/CX_MGW_TECH_EXCEPTION .
+ENDCLASS.
+
+
+
+CLASS ZCL_ZLFC_GR_DPC_EXT IMPLEMENTATION.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method ZCL_ZLFC_GR_DPC_EXT->/IWBEP/IF_MGW_APPL_SRV_RUNTIME~CREATE_DEEP_ENTITY
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_ENTITY_NAME                 TYPE        STRING(optional)
+* | [--->] IV_ENTITY_SET_NAME             TYPE        STRING(optional)
+* | [--->] IV_SOURCE_NAME                 TYPE        STRING(optional)
+* | [--->] IO_DATA_PROVIDER               TYPE REF TO /IWBEP/IF_MGW_ENTRY_PROVIDER
+* | [--->] IT_KEY_TAB                     TYPE        /IWBEP/T_MGW_NAME_VALUE_PAIR(optional)
+* | [--->] IT_NAVIGATION_PATH             TYPE        /IWBEP/T_MGW_NAVIGATION_PATH(optional)
+* | [--->] IO_EXPAND                      TYPE REF TO /IWBEP/IF_MGW_ODATA_EXPAND
+* | [--->] IO_TECH_REQUEST_CONTEXT        TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITY_C(optional)
+* | [<---] ER_DEEP_ENTITY                 TYPE REF TO DATA
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method /IWBEP/IF_MGW_APPL_SRV_RUNTIME~CREATE_DEEP_ENTITY.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Create Deep Entity Method
+* NOTES:        Actual logic is implemented in the <<<Entity>>>_SAVE method. This
+*               method then calls the implementation based on the Entity
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  25.03.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 25.03.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+*-----------------------------------------------------------------------------------------
+
+  data:
+    l_methodname type tmdir-methodname.
+
+  try.
+
+      l_methodname = iv_entity_name && '_SAVE'.
+      translate l_methodname to upper case.
+
+      call method (l_methodname)
+        exporting
+          iv_entity_name          = iv_entity_name
+          iv_entity_set_name      = iv_entity_set_name
+          iv_source_name          = iv_source_name
+          io_data_provider        = io_data_provider
+          it_key_tab              = it_key_tab
+          it_navigation_path      = it_navigation_path
+          io_expand               = io_expand
+          io_tech_request_context = io_tech_request_context
+        importing
+          er_deep_entity          = er_deep_entity.
+
+    catch cx_sy_dyn_call_illegal_method.
+  endtry.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method ZCL_ZLFC_GR_DPC_EXT->/IWBEP/IF_MGW_APPL_SRV_RUNTIME~GET_EXPANDED_ENTITY
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_ENTITY_NAME                 TYPE        STRING(optional)
+* | [--->] IV_ENTITY_SET_NAME             TYPE        STRING(optional)
+* | [--->] IV_SOURCE_NAME                 TYPE        STRING(optional)
+* | [--->] IT_KEY_TAB                     TYPE        /IWBEP/T_MGW_NAME_VALUE_PAIR(optional)
+* | [--->] IT_NAVIGATION_PATH             TYPE        /IWBEP/T_MGW_NAVIGATION_PATH(optional)
+* | [--->] IO_EXPAND                      TYPE REF TO /IWBEP/IF_MGW_ODATA_EXPAND(optional)
+* | [--->] IO_TECH_REQUEST_CONTEXT        TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITY(optional)
+* | [<---] ER_ENTITY                      TYPE REF TO DATA
+* | [<---] ES_RESPONSE_CONTEXT            TYPE        /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_ENTITY_CNTXT
+* | [<---] ET_EXPANDED_CLAUSES            TYPE        STRING_TABLE
+* | [<---] ET_EXPANDED_TECH_CLAUSES       TYPE        STRING_TABLE
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method /iwbep/if_mgw_appl_srv_runtime~get_expanded_entity.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Get Expanded Entity Method
+* NOTES:        Actual logic is implemented in the <<<Entity>>>_GET_EE method. This
+*               method then calls the implementation based on the Entity
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  25.03.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 25.03.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+*-----------------------------------------------------------------------------------------
+
+  data:
+    l_methodname type tmdir-methodname.
+
+  try.
+
+      l_methodname = iv_entity_name && '_GET_EE'.
+      translate l_methodname to upper case.
+
+      call method (l_methodname)
+        exporting
+          iv_entity_name           = iv_entity_name
+          iv_entity_set_name       = iv_entity_set_name
+          iv_source_name           = iv_source_name
+          it_key_tab               = it_key_tab
+          it_navigation_path       = it_navigation_path
+          io_expand                = io_expand
+          io_tech_request_context  = io_tech_request_context
+        importing
+          er_entity                = er_entity
+          es_response_context      = es_response_context
+          et_expanded_clauses      = et_expanded_clauses
+          et_expanded_tech_clauses = et_expanded_tech_clauses.
+
+    catch cx_sy_dyn_call_illegal_method.
+  endtry.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method ZCL_ZLFC_GR_DPC_EXT->/IWBEP/IF_MGW_APPL_SRV_RUNTIME~GET_EXPANDED_ENTITYSET
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_ENTITY_NAME                 TYPE        STRING(optional)
+* | [--->] IV_ENTITY_SET_NAME             TYPE        STRING(optional)
+* | [--->] IV_SOURCE_NAME                 TYPE        STRING(optional)
+* | [--->] IT_FILTER_SELECT_OPTIONS       TYPE        /IWBEP/T_MGW_SELECT_OPTION(optional)
+* | [--->] IT_ORDER                       TYPE        /IWBEP/T_MGW_SORTING_ORDER(optional)
+* | [--->] IS_PAGING                      TYPE        /IWBEP/S_MGW_PAGING(optional)
+* | [--->] IT_NAVIGATION_PATH             TYPE        /IWBEP/T_MGW_NAVIGATION_PATH(optional)
+* | [--->] IT_KEY_TAB                     TYPE        /IWBEP/T_MGW_NAME_VALUE_PAIR(optional)
+* | [--->] IV_FILTER_STRING               TYPE        STRING(optional)
+* | [--->] IV_SEARCH_STRING               TYPE        STRING(optional)
+* | [--->] IO_EXPAND                      TYPE REF TO /IWBEP/IF_MGW_ODATA_EXPAND(optional)
+* | [--->] IO_TECH_REQUEST_CONTEXT        TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITYSET(optional)
+* | [<---] ER_ENTITYSET                   TYPE REF TO DATA
+* | [<---] ET_EXPANDED_CLAUSES            TYPE        STRING_TABLE
+* | [<---] ET_EXPANDED_TECH_CLAUSES       TYPE        STRING_TABLE
+* | [<---] ES_RESPONSE_CONTEXT            TYPE        TY_S_MGW_RESPONSE_CONTEXT
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method /IWBEP/IF_MGW_APPL_SRV_RUNTIME~GET_EXPANDED_ENTITYSET.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Get Expanded EntitySet Method
+* NOTES:        This method has no implemenation (i.e. is blank) but needs to be redefined
+*               for expanded method (/IWBEP/IF_MGW_APPL_SRV_RUNTIME~GET_EXPANDED_ENTITY)
+*               to work
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  25.03.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 25.03.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+*-----------------------------------------------------------------------------------------
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Protected Method ZCL_ZLFC_GR_DPC_EXT->ASSETS_CREATE_ENTITY
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_ENTITY_NAME                 TYPE        STRING
+* | [--->] IV_ENTITY_SET_NAME             TYPE        STRING
+* | [--->] IV_SOURCE_NAME                 TYPE        STRING
+* | [--->] IT_KEY_TAB                     TYPE        /IWBEP/T_MGW_NAME_VALUE_PAIR
+* | [--->] IO_TECH_REQUEST_CONTEXT        TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITY_C(optional)
+* | [--->] IT_NAVIGATION_PATH             TYPE        /IWBEP/T_MGW_NAVIGATION_PATH
+* | [--->] IO_DATA_PROVIDER               TYPE REF TO /IWBEP/IF_MGW_ENTRY_PROVIDER(optional)
+* | [<---] ER_ENTITY                      TYPE        ZCL_ZLFC_GR_MPC=>TS_ASSET
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method assets_create_entity.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Assets Create Entity - saves update to asset data
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  30.11.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 30.11.2020 220977FKC RD2K920449 6000002172 MyFi Purchasing (Release 2.3)
+*-----------------------------------------------------------------------------------------
+
+  data:
+    lo_message_container  type ref to /iwbep/if_message_container,
+    ls_generaldata        type bapi1022_feglg001,
+    ls_generaldatax       type bapi1022_feglg001x,
+    ls_inventory          type bapi1022_feglg011,
+    ls_inventoryx	        type bapi1022_feglg011x,
+    ls_timedependentdata  type bapi1022_feglg003,
+    ls_timedependentdatax type bapi1022_feglg003x,
+    l_msgv                type symsgv,
+    ls_return             type bapiret2.
+
+*===> read the supplied data
+  io_data_provider->read_entry_data(
+    importing
+      es_data = er_entity ).
+
+*--- message container setup
+  lo_message_container = mo_context->get_message_container( ).
+
+*--- convert to BAPI format
+  if er_entity-serial_no_off ne abap_true.
+    ls_generaldata-serial_no = er_entity-serial_no.
+    ls_generaldatax-serial_no = abap_true.
+  endif.
+
+  if er_entity-invent_no_off ne abap_true.
+    ls_generaldata-invent_no = er_entity-invent_no.
+    ls_generaldatax-invent_no = abap_true.
+  endif.
+
+  if er_entity-main_descript_off ne abap_true.
+    ls_generaldata-main_descript = er_entity-main_descript.
+    ls_generaldatax-main_descript = abap_true.
+    ls_generaldata-descript = er_entity-main_descript.
+    ls_generaldatax-descript = abap_true.
+  endif.
+
+  if er_entity-note_off ne abap_true.
+    ls_inventory-note = er_entity-note.
+    ls_inventoryx-note = abap_true.
+  endif.
+
+  ls_timedependentdata-from_date = sy-datum.
+  ls_timedependentdata-to_date = '99991231'.
+
+  if er_entity-plate_no_off ne abap_true.
+    ls_timedependentdata-plate_no = er_entity-plate_no.
+    ls_timedependentdatax-license_plate_no = abap_true.
+  endif.
+
+  if er_entity-room_off ne abap_true
+  and er_entity-room_locked ne abap_true.
+    ls_timedependentdata-room = er_entity-room.
+    ls_timedependentdatax-room = abap_true.
+  endif.
+
+*--- update asset using BAPI
+  call function 'BAPI_FIXEDASSET_CHANGE'
+    exporting
+      companycode        = er_entity-comp_code
+      asset              = er_entity-asset_no
+      subnumber          = er_entity-sub_number
+      generaldata        = ls_generaldata
+      generaldatax       = ls_generaldatax
+      inventory          = ls_inventory
+      inventoryx         = ls_inventoryx
+      timedependentdata  = ls_timedependentdata
+      timedependentdatax = ls_timedependentdatax
+    importing
+      return             = ls_return.
+
+  if sy-subrc = 0 and ls_return-type = rs_c_success.
+    call function 'BAPI_TRANSACTION_COMMIT'
+      exporting
+        wait   = abap_true
+      importing
+        return = ls_return.
+    if sy-subrc = 0.
+      call function 'CONVERSION_EXIT_ALPHA_OUTPUT'
+        exporting
+          input  = er_entity-asset_no
+        importing
+          output = er_entity-asset_no.
+      call function 'CONVERSION_EXIT_ALPHA_OUTPUT'
+        exporting
+          input  = er_entity-sub_number
+        importing
+          output = er_entity-sub_number.
+      concatenate er_entity-asset_no '-' er_entity-sub_number into l_msgv
+        separated by space.
+      "l_msgv = er_entity-asset_no && ' - ' && er_entity-sub_number.
+      message s012 into ls_return-message.
+      lo_message_container->add_message(
+        iv_msg_type = sy-msgty
+        iv_msg_id = sy-msgid
+        iv_msg_number = sy-msgno
+        iv_msg_v1 = l_msgv
+        iv_add_to_response_header = abap_true ).
+    else.
+      lo_message_container->add_message(
+        iv_msg_type = sy-msgty
+        iv_msg_id = sy-msgid
+        iv_msg_number = sy-msgno
+        iv_msg_v1 = sy-msgv1
+        iv_msg_v2 = sy-msgv2
+        iv_msg_v3 = sy-msgv3
+        iv_msg_v4 = sy-msgv4
+        iv_add_to_response_header = abap_true ).
+    endif.
+  else.
+    if ls_return is not initial.
+      lo_message_container->add_message_from_bapi(
+        is_bapi_message = ls_return
+        iv_add_to_response_header = abap_true
+        iv_message_target = '' ).
+    else.
+      lo_message_container->add_message(
+        iv_msg_type = sy-msgty
+        iv_msg_id = sy-msgid
+        iv_msg_number = sy-msgno
+        iv_msg_v1 = sy-msgv1
+        iv_msg_v2 = sy-msgv2
+        iv_msg_v3 = sy-msgv3
+        iv_msg_v4 = sy-msgv4
+        iv_add_to_response_header = abap_true ).
+    endif.
+  endif.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Protected Method ZCL_ZLFC_GR_DPC_EXT->ASSETS_GET_ENTITY
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_ENTITY_NAME                 TYPE        STRING
+* | [--->] IV_ENTITY_SET_NAME             TYPE        STRING
+* | [--->] IV_SOURCE_NAME                 TYPE        STRING
+* | [--->] IT_KEY_TAB                     TYPE        /IWBEP/T_MGW_NAME_VALUE_PAIR
+* | [--->] IO_REQUEST_OBJECT              TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITY(optional)
+* | [--->] IO_TECH_REQUEST_CONTEXT        TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITY(optional)
+* | [--->] IT_NAVIGATION_PATH             TYPE        /IWBEP/T_MGW_NAVIGATION_PATH
+* | [<---] ER_ENTITY                      TYPE        ZCL_ZLFC_GR_MPC=>TS_ASSET
+* | [<---] ES_RESPONSE_CONTEXT            TYPE        /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_ENTITY_CNTXT
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method assets_get_entity.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Assets Get Entity - returns asset details
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  30.11.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 30.11.2020 220977FKC RD2K920449 6000002172 MyFi Purchasing (Release 2.3)
+*-----------------------------------------------------------------------------------------
+
+  data:
+    l_felei type felei.
+
+*--- get converted key
+  io_tech_request_context->get_converted_keys(
+    importing
+      es_key_values = er_entity ).
+
+*--- get asset detail for selected key
+  select single anla~anlkl as assetclass
+      anla~invzu as note
+      anla~invnr as invent_no
+      anla~sernr as serial_no
+      anlh~anlhtxt as main_descript
+      anlz~kostl as costcenter
+      anlz~stort as location
+      anlz~raumn as room
+      anlz~kfzkz as plate_no
+    from anla
+    inner join anlz
+      on anlz~bukrs = anla~bukrs
+      and anlz~anln1 = anla~anln1
+      and anlz~anln2 = anla~anln2
+    left outer join anlh
+      on anlh~bukrs = anla~bukrs
+      and anlh~anln1 = anla~anln1
+    into corresponding fields of er_entity
+    where anla~bukrs = er_entity-comp_code
+      and anla~anln1 = er_entity-asset_no
+      and anla~anln2 = er_entity-sub_number
+      and anlz~bdatu >= sy-datum
+      and anlz~adatu <= sy-datum.
+
+*--- field layout
+  select single felei
+    from anka
+    into l_felei
+    where anlkl = er_entity-assetclass.
+
+*--- turn fields off based on layout
+  er_entity-main_descript_off = _field_is_off( i_felei = l_felei i_fegru = '07' ).
+  er_entity-note_off          = _field_is_off( i_felei = l_felei i_fegru = '37' ).
+  er_entity-invent_no_off     = _field_is_off( i_felei = l_felei i_fegru = '04' ).
+  er_entity-serial_no_off     = _field_is_off( i_felei = l_felei i_fegru = '75' ).
+  er_entity-room_off          = _field_is_off( i_felei = l_felei i_fegru = '19' ).
+  er_entity-plate_no_off      = _field_is_off( i_felei = l_felei i_fegru = '14' ).
+
+**--- set room locked if already has a value
+*  if er_entity-room is not initial.
+*    er_entity-room_locked = abap_true.
+*  endif.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Private Method ZCL_ZLFC_GR_DPC_EXT->GOODSRECEIPT_GET_EE
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_ENTITY_NAME                 TYPE        STRING(optional)
+* | [--->] IV_ENTITY_SET_NAME             TYPE        STRING(optional)
+* | [--->] IV_SOURCE_NAME                 TYPE        STRING(optional)
+* | [--->] IT_KEY_TAB                     TYPE        /IWBEP/T_MGW_NAME_VALUE_PAIR(optional)
+* | [--->] IT_NAVIGATION_PATH             TYPE        /IWBEP/T_MGW_NAVIGATION_PATH(optional)
+* | [--->] IO_EXPAND                      TYPE REF TO /IWBEP/IF_MGW_ODATA_EXPAND(optional)
+* | [--->] IO_TECH_REQUEST_CONTEXT        TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITY(optional)
+* | [<---] ER_ENTITY                      TYPE REF TO DATA
+* | [<---] ES_RESPONSE_CONTEXT            TYPE        /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_ENTITY_CNTXT
+* | [<---] ET_EXPANDED_CLAUSES            TYPE        STRING_TABLE
+* | [<---] ET_EXPANDED_TECH_CLAUSES       TYPE        STRING_TABLE
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method goodsreceipt_get_ee.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Get Goods Receipt Expanded Entity
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  12.04.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 12.04.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+*-----------------------------------------------------------------------------------------
+
+  data:
+    ls_key                 type zcl_zlfc_gr_mpc=>ts_goodsreceipt,
+    ls_goodsreceipt_deep   type ty_goodsreceipt_deep,
+    l_expanded_tech_clause type string.
+
+*--- get converted key
+  io_tech_request_context->get_converted_keys(
+    importing
+      es_key_values = ls_key ).
+
+*--- if year is blank look it up (BAPI requires it)
+  if ls_key-doc_year is initial.
+    select single mjahr
+      into ls_key-doc_year
+      from mkpf
+      where mblnr = ls_key-mat_doc.
+  endif.
+
+*--- read GR using helper method
+  ls_goodsreceipt_deep = _read_gr( i_mat_doc = ls_key-mat_doc i_doc_year = ls_key-doc_year ).
+
+*--- return the data
+  copy_data_to_ref(
+    exporting
+      is_data = ls_goodsreceipt_deep
+    changing
+      cr_data = er_entity ).
+
+*--- return the expanded tech clauses
+  l_expanded_tech_clause = 'Items'.
+  insert l_expanded_tech_clause into table et_expanded_tech_clauses.
+
+  l_expanded_tech_clause = 'MaterialDocuments'.
+  insert l_expanded_tech_clause into table et_expanded_tech_clauses.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Private Method ZCL_ZLFC_GR_DPC_EXT->GOODSRECEIPT_SAVE
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_ENTITY_NAME                 TYPE        STRING(optional)
+* | [--->] IV_ENTITY_SET_NAME             TYPE        STRING(optional)
+* | [--->] IV_SOURCE_NAME                 TYPE        STRING(optional)
+* | [--->] IO_DATA_PROVIDER               TYPE REF TO /IWBEP/IF_MGW_ENTRY_PROVIDER
+* | [--->] IT_KEY_TAB                     TYPE        /IWBEP/T_MGW_NAME_VALUE_PAIR(optional)
+* | [--->] IT_NAVIGATION_PATH             TYPE        /IWBEP/T_MGW_NAVIGATION_PATH(optional)
+* | [--->] IO_EXPAND                      TYPE REF TO /IWBEP/IF_MGW_ODATA_EXPAND
+* | [--->] IO_TECH_REQUEST_CONTEXT        TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITY_C(optional)
+* | [<---] ER_DEEP_ENTITY                 TYPE REF TO DATA
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method goodsreceipt_save.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Goods Receipt Entity Save (Create Deep Entity Method)
+* NOTES:
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  13.04.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 13.04.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+*-----------------------------------------------------------------------------------------
+
+  data:
+    lo_message_container type ref to /iwbep/if_message_container,
+    ls_goodsreceipt_deep type ty_goodsreceipt_deep.
+
+*--- read the supplied data
+  io_data_provider->read_entry_data(
+    importing
+      es_data = ls_goodsreceipt_deep ).
+
+*--- cancel the gr
+  _cancel_gr(
+    changing
+      cs_goodsreceipt_deep = ls_goodsreceipt_deep ).
+
+*===> response data
+  copy_data_to_ref(
+    exporting
+     is_data = ls_goodsreceipt_deep
+    changing
+      cr_data = er_deep_entity ).
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Private Method ZCL_ZLFC_GR_DPC_EXT->PURCHASEORDER_GET_EE
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_ENTITY_NAME                 TYPE        STRING(optional)
+* | [--->] IV_ENTITY_SET_NAME             TYPE        STRING(optional)
+* | [--->] IV_SOURCE_NAME                 TYPE        STRING(optional)
+* | [--->] IT_KEY_TAB                     TYPE        /IWBEP/T_MGW_NAME_VALUE_PAIR(optional)
+* | [--->] IT_NAVIGATION_PATH             TYPE        /IWBEP/T_MGW_NAVIGATION_PATH(optional)
+* | [--->] IO_EXPAND                      TYPE REF TO /IWBEP/IF_MGW_ODATA_EXPAND(optional)
+* | [--->] IO_TECH_REQUEST_CONTEXT        TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITY(optional)
+* | [<---] ER_ENTITY                      TYPE REF TO DATA
+* | [<---] ES_RESPONSE_CONTEXT            TYPE        /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_ENTITY_CNTXT
+* | [<---] ET_EXPANDED_CLAUSES            TYPE        STRING_TABLE
+* | [<---] ET_EXPANDED_TECH_CLAUSES       TYPE        STRING_TABLE
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method purchaseorder_get_ee.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Get Purchase Order Expanded Entity
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  25.03.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 25.03.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+* 21.10.2020 220977FKC RD2K919880 6000002064 VIM Integration with MyFi, if coming from VIM
+*                                            populate VIM details
+* 30.11.2020 220977FKC RD2K920449 6000002172 6000002172: MyFi Purchasing (Release 2.3),
+*                                            return 'Assets'
+*-----------------------------------------------------------------------------------------
+
+  data:
+    ls_key                 type zcl_zlfc_gr_mpc=>ts_purchaseorder,
+    ls_purchaseorder_deep  type ty_purchaseorder_deep,
+    l_expanded_tech_clause type string.
+
+*--- get converted key
+  io_tech_request_context->get_converted_keys(
+    importing
+      es_key_values = ls_key ).
+
+*--- read PO using helper method
+  ls_purchaseorder_deep = _read_po( ls_key-po_number ).
+
+*--- return the data
+  copy_data_to_ref(
+    exporting
+      is_data = ls_purchaseorder_deep
+    changing
+      cr_data = er_entity ).
+
+*--- return the expanded tech clauses
+  l_expanded_tech_clause = 'Items'.
+  insert l_expanded_tech_clause into table et_expanded_tech_clauses.
+
+  l_expanded_tech_clause = 'Movements'.
+  insert l_expanded_tech_clause into table et_expanded_tech_clauses.
+
+  l_expanded_tech_clause = 'MaterialDocuments'.
+  insert l_expanded_tech_clause into table et_expanded_tech_clauses.
+
+  l_expanded_tech_clause = 'Assets'.
+  insert l_expanded_tech_clause into table et_expanded_tech_clauses.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Private Method ZCL_ZLFC_GR_DPC_EXT->PURCHASEORDER_SAVE
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_ENTITY_NAME                 TYPE        STRING(optional)
+* | [--->] IV_ENTITY_SET_NAME             TYPE        STRING(optional)
+* | [--->] IV_SOURCE_NAME                 TYPE        STRING(optional)
+* | [--->] IO_DATA_PROVIDER               TYPE REF TO /IWBEP/IF_MGW_ENTRY_PROVIDER
+* | [--->] IT_KEY_TAB                     TYPE        /IWBEP/T_MGW_NAME_VALUE_PAIR(optional)
+* | [--->] IT_NAVIGATION_PATH             TYPE        /IWBEP/T_MGW_NAVIGATION_PATH(optional)
+* | [--->] IO_EXPAND                      TYPE REF TO /IWBEP/IF_MGW_ODATA_EXPAND
+* | [--->] IO_TECH_REQUEST_CONTEXT        TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITY_C(optional)
+* | [<---] ER_DEEP_ENTITY                 TYPE REF TO DATA
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method purchaseorder_save.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Purchase Order Entity Save (Create Deep Entity Method)
+* NOTES:
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  28.03.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 28.03.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+*-----------------------------------------------------------------------------------------
+
+  data:
+    ls_purchaseorder_deep type ty_purchaseorder_deep,
+    l_validate_only       type abap_bool.
+
+*--- read the supplied data
+  io_data_provider->read_entry_data(
+    importing
+      es_data = ls_purchaseorder_deep ).
+
+*--- set the mode
+  if ls_purchaseorder_deep-submit_flag = abap_true.
+    l_validate_only = abap_false.
+  else.
+    l_validate_only = abap_true.
+  endif.
+
+*--- create the gr
+  _create_gr(
+    exporting
+      i_test_mode = l_validate_only
+    changing
+      cs_purchaseorder_deep = ls_purchaseorder_deep ).
+
+*===> response data
+  copy_data_to_ref(
+    exporting
+     is_data = ls_purchaseorder_deep
+    changing
+      cr_data = er_deep_entity ).
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Protected Method ZCL_ZLFC_GR_DPC_EXT->USERDETAILS_GET_ENTITYSET
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_ENTITY_NAME                 TYPE        STRING
+* | [--->] IV_ENTITY_SET_NAME             TYPE        STRING
+* | [--->] IV_SOURCE_NAME                 TYPE        STRING
+* | [--->] IT_FILTER_SELECT_OPTIONS       TYPE        /IWBEP/T_MGW_SELECT_OPTION
+* | [--->] IS_PAGING                      TYPE        /IWBEP/S_MGW_PAGING
+* | [--->] IT_KEY_TAB                     TYPE        /IWBEP/T_MGW_NAME_VALUE_PAIR
+* | [--->] IT_NAVIGATION_PATH             TYPE        /IWBEP/T_MGW_NAVIGATION_PATH
+* | [--->] IT_ORDER                       TYPE        /IWBEP/T_MGW_SORTING_ORDER
+* | [--->] IV_FILTER_STRING               TYPE        STRING
+* | [--->] IV_SEARCH_STRING               TYPE        STRING
+* | [--->] IO_TECH_REQUEST_CONTEXT        TYPE REF TO /IWBEP/IF_MGW_REQ_ENTITYSET(optional)
+* | [<---] ET_ENTITYSET                   TYPE        ZCL_ZLFC_GR_MPC=>TT_USERDETAIL
+* | [<---] ES_RESPONSE_CONTEXT            TYPE        /IWBEP/IF_MGW_APPL_SRV_RUNTIME=>TY_S_MGW_RESPONSE_CONTEXT
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method userdetails_get_entityset.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  UserDetails Get EntitySet
+* NOTES:        Returs the details of logged on user.
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  24.04.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 24.04.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+*-----------------------------------------------------------------------------------------
+
+  data:
+    ls_entity like line of et_entityset,
+    l_pernr   type pernr,
+    l_usrid   type sysid,
+    l_nachn	  type pad_nachn,
+    l_vorna   type pad_vorna,
+    l_titel   type titel.
+
+*--- user ID
+  ls_entity-user_id = sy-uname.
+
+*--- full name
+  select single name_text
+    from v_usr_name
+    into ls_entity-full_name
+    where bname = sy-uname.
+  if ls_entity-full_name is initial.
+    ls_entity-full_name = sy-uname.
+  endif.
+
+*--- employee ID
+  l_pernr = sy-uname.
+  select single pernr
+    from pa0001
+    into l_pernr
+    where pernr = l_pernr.
+  if sy-subrc <> 0.
+    l_usrid = sy-uname.
+    select single pernr
+      from pa0105
+      into l_pernr
+      where usrid eq l_usrid
+        and subty eq '0001'.
+  endif.
+
+*--- full name from HR
+  if l_pernr is not initial.
+    select single nachn vorna titel
+      from pa0002
+      into (l_nachn, l_vorna, l_titel)
+      where pernr = l_pernr
+        and begda le sy-datum
+        and endda ge sy-datum.
+    if sy-subrc = 0.
+      concatenate l_titel l_vorna l_nachn into ls_entity-full_name_hr separated by space.
+    endif.
+  endif.
+  if ls_entity-full_name_hr is initial.
+    ls_entity-full_name_hr = ls_entity-full_name.
+  endif.
+
+*===> TODO:
+**--- help Url
+*  select single url
+*    from ztfss_url
+*    into ls_entity-help_url
+*    where tag = 'USER_GUIDES'.
+
+*--- append the entity
+  append ls_entity to et_entityset.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Private Method ZCL_ZLFC_GR_DPC_EXT->_CANCEL_GR
+* +-------------------------------------------------------------------------------------------------+
+* | [<-->] CS_GOODSRECEIPT_DEEP           TYPE        TY_GOODSRECEIPT_DEEP
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method _cancel_gr.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Helper Method to cancel a Goods Receipt
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  13.04.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 13.04.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+*-----------------------------------------------------------------------------------------
+
+  data:
+    lo_message_container type ref to /iwbep/if_message_container,
+    lx_root              type ref to cx_root,
+    lt_return            type bapiret2_t,
+    ls_return            like line of lt_return,
+    lt_gr_item           type standard table of bapi2017_gm_item_04,
+    ls_gr_item           like line of lt_gr_item,
+    ls_result            type bapi2017_gm_head_ret,
+    l_message            type bapi_msg,
+    ls_goodsreceiptitem  type zcl_zlfc_gr_mpc=>ts_goodsreceiptitem,
+    lt_goodsreceiptitem  type zcl_zlfc_gr_mpc=>tt_goodsreceiptitem,
+    ls_materialdocument  type zcl_zlfc_gr_mpc=>ts_materialdocument.
+
+  field-symbols:
+    <ls_goodsreceiptitem>  type zcl_zlfc_gr_mpc=>ts_goodsreceiptitem.
+
+*--- message container setup
+  lo_message_container = mo_context->get_message_container( ).
+
+*--- get gr items
+  loop at cs_goodsreceipt_deep-items into ls_goodsreceiptitem
+  where selected = abap_true.
+    clear ls_gr_item.
+    ls_gr_item-matdoc_item = ls_goodsreceiptitem-matdoc_itm.
+    append ls_gr_item to lt_gr_item.
+    append ls_goodsreceiptitem to lt_goodsreceiptitem.
+  endloop.
+
+*--- cancel the gr
+  call function 'BAPI_GOODSMVT_CANCEL'
+    exporting
+      materialdocument    = cs_goodsreceipt_deep-mat_doc
+      matdocumentyear     = cs_goodsreceipt_deep-doc_year
+    importing
+      goodsmvt_headret    = ls_result
+    tables
+      return              = lt_return
+      goodsmvt_matdocitem = lt_gr_item.
+
+  if lt_return is not initial.
+
+*--- replace WBS/IO system message with custom
+    loop at lt_return into ls_return where type = 'E'.
+
+*--- read PO item number & remove leading zeros (for custom error messages)
+      clear ls_goodsreceiptitem.
+      read table lt_goodsreceiptitem into ls_goodsreceiptitem index ls_return-row.
+      call function 'CONVERSION_EXIT_ALPHA_OUTPUT'
+        exporting
+          input  = ls_goodsreceiptitem-po_item
+        importing
+          output = ls_goodsreceiptitem-po_item.
+      concatenate text-pp1 ls_goodsreceiptitem-po_item into l_message separated by space.
+
+*--- replace wbs/io error
+      if ls_return-id = 'BS' and ls_return-number = 013.
+        delete lt_return index sy-tabix.
+
+        if ls_return-message_v2(3) = 'ORD'.
+          replace first occurrence of 'ORD' in ls_return-message_v2 with text-aa4.
+        endif.
+
+        message e009 with ls_return-message_v2 l_message ac_ap_name ac_ap_email into l_message.
+        lo_message_container->add_message(
+          iv_msg_type = sy-msgty
+         iv_msg_id = sy-msgid
+          iv_msg_number = sy-msgno
+          iv_msg_v1 = sy-msgv1
+          iv_msg_v2 = sy-msgv2
+          iv_msg_v3 = sy-msgv3
+          iv_msg_v4 = sy-msgv4
+          iv_add_to_response_header = abap_true ).
+      endif.
+
+*--- replace gl error
+      if ls_return-id = 'M7' and ( ls_return-number = 161 or ls_return-number = 160 ).
+        delete lt_return index sy-tabix.
+
+        concatenate text-aa1 ls_return-message_v1 into ls_return-message_v1 separated by space.
+        message e009 with ls_return-message_v1 l_message ac_ap_name ac_ap_email into l_message.
+        lo_message_container->add_message(
+          iv_msg_type = sy-msgty
+          iv_msg_id = sy-msgid
+          iv_msg_number = sy-msgno
+          iv_msg_v1 = sy-msgv1
+          iv_msg_v2 = sy-msgv2
+          iv_msg_v3 = sy-msgv3
+          iv_msg_v4 = sy-msgv4
+          iv_add_to_response_header = abap_true ).
+      endif.
+
+*--- replace cc error
+      if ls_return-id = 'KI' and ls_return-number = 260.
+        delete lt_return index sy-tabix.
+        concatenate text-aa2 ls_return-message_v2 into ls_return-message_v1 separated by space.
+        message e009 with ls_return-message_v1 l_message ac_ap_name ac_ap_email into l_message.
+        lo_message_container->add_message(
+          iv_msg_type = sy-msgty
+          iv_msg_id = sy-msgid
+          iv_msg_number = sy-msgno
+          iv_msg_v1 = sy-msgv1
+          iv_msg_v2 = sy-msgv2
+          iv_msg_v3 = sy-msgv3
+          iv_msg_v4 = sy-msgv4
+          iv_add_to_response_header = abap_true ).
+      endif.
+
+*--- highlight line
+      read table cs_goodsreceipt_deep-items assigning <ls_goodsreceiptitem>
+        with key matdoc_itm = ls_goodsreceiptitem-matdoc_itm.
+      if sy-subrc = 0.
+        <ls_goodsreceiptitem>-line_status = 'Error'.
+      endif.
+
+    endloop.
+
+    lo_message_container->add_messages_from_bapi(
+      it_bapi_messages = lt_return
+      iv_add_to_response_header = abap_true ).
+
+  elseif ls_result-mat_doc is not initial.
+
+    call function 'BAPI_TRANSACTION_COMMIT'
+      exporting
+        wait   = abap_true
+      importing
+        return = ls_return.
+
+    if ls_return is not initial.
+      lo_message_container->add_message_from_bapi(
+        is_bapi_message = ls_return
+        iv_add_to_response_header = abap_true
+        iv_message_target = '' ).
+    else.
+      ls_materialdocument-mat_doc = ls_result-mat_doc.
+      ls_materialdocument-doc_year = ls_result-doc_year.
+      append ls_materialdocument to cs_goodsreceipt_deep-materialdocuments.
+    endif.
+
+  endif.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Private Method ZCL_ZLFC_GR_DPC_EXT->_CREATE_GR
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_TEST_MODE                    TYPE        ABAP_BOOL
+* | [<-->] CS_PURCHASEORDER_DEEP          TYPE        TY_PURCHASEORDER_DEEP
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+METHOD _create_gr.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Helper Method to create a Goods Receipt
+* NOTES:        Can be called in "test mode" for validation
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  01.04.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 01.04.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+* 21.10.2020 220977FKC RD2K919880 6000002064 VIM Integration with MyFi, change to save
+*                                            details in VIM GR matching table if a VIM GR
+*                                            and add a warning when the gr total does not
+*                                            match VIM balance (for VIM originated GR's)
+* 26.11.2020 220977FKC RD2K920464	6000002226 VIM integration with MyFi issue fix: do not
+*                                            show balance warning
+* 24.03.2021 180876KNS RD2K920868 6000002322 Include MyFi Data in creation of Goods Movement
+*  This change will create new extension to be passed into FM BAPI_GOODSMVT_CREATE
+*-----------------------------------------------------------------------------------------
+
+  CONSTANTS:
+    lc_export_prefix         TYPE char7 VALUE 'ZFSS_GR'.
+
+  DATA:
+    lo_message_container     TYPE REF TO /iwbep/if_message_container,
+    lx_root                  TYPE REF TO cx_root,
+    l_msgty                  TYPE symsgty,
+    ls_purchaseorderitem     TYPE zcl_zlfc_gr_mpc=>ts_purchaseorderitem,
+    ls_purchaseordermovement TYPE zcl_zlfc_gr_mpc=>ts_purchaseordermovement,
+    lt_goodsmvt_header       TYPE STANDARD TABLE OF bapi2017_gm_head_01,
+    ls_goodsmvt_header       TYPE bapi2017_gm_head_01,
+    ls_goodsmvt_code         TYPE bapi2017_gm_code,
+    lt_goodsmvt_item         TYPE STANDARD TABLE OF bapi2017_gm_item_create,
+    ls_goodsmvt_item         LIKE LINE OF lt_goodsmvt_item,
+    lt_goodsmvt_item_2       TYPE STANDARD TABLE OF bapi2017_gm_item_create,
+    lt_return                TYPE bapiret2_t,
+    ls_return                LIKE LINE OF lt_return,
+    l_message                TYPE bapi_msg,
+    l_count                  TYPE i,
+    lt_materialdocument      TYPE zcl_zlfc_gr_mpc=>tt_materialdocument,
+    ls_materialdocument      TYPE zcl_zlfc_gr_mpc=>ts_materialdocument,
+    l_has_assetline          TYPE abap_bool,
+    l_export_id              TYPE char22,
+    l_uname                  TYPE uname,
+*===> TODO:
+*    lt_vim_gr                TYPE STANDARD TABLE OF zvim_gr_app_gr,
+    l_amount                 TYPE bapicurr_d,
+    l_amount_str             TYPE char30,
+*-- DATA : MyFi data to be passed into BAPI_GOODSMVT_CREATE using extension mechanism
+*===> TODO:
+*    ls_zbapi2017_gm_zmyfi    TYPE zbapi2017_gm_zmyfi, " ZCL_FVIM_CONSTANTS=>GC_BAPI2017_GM_ZMYFI_EXTENSION
+    ls_gm_create_extension   TYPE bapiparex,
+    lt_gm_create_extension   TYPE TABLE OF bapiparex.
+
+*  FIELD-SYMBOLS:
+*    <ls_vim_gr> LIKE LINE OF lt_vim_gr.
+
+*--- message container setup
+  lo_message_container = mo_context->get_message_container( ).
+
+*--- clear results area
+  CLEAR cs_purchaseorder_deep-materialdocuments.
+
+*--- gr code (constant)
+  ls_goodsmvt_code-gm_code = '01'.
+
+*--- if header text, ref doc no & date are the same we create a single
+*    (as per functional spec)
+  LOOP AT cs_purchaseorder_deep-movements INTO ls_purchaseordermovement.
+    CLEAR ls_goodsmvt_header.
+    ls_goodsmvt_header-pstng_date = sy-datum.
+    ls_goodsmvt_header-doc_date = ls_purchaseordermovement-doc_date.
+    ls_goodsmvt_header-ref_doc_no = ls_purchaseordermovement-ref_doc_no.
+    ls_goodsmvt_header-header_txt = ls_purchaseordermovement-header_txt.
+    COLLECT ls_goodsmvt_header INTO lt_goodsmvt_header.
+  ENDLOOP.
+
+*--- sort for binary search below
+  SORT cs_purchaseorder_deep-items BY po_item.
+
+
+*===> TODO:
+**--- Fill MyFi extension data for Goods Movement Creation
+**  This data element indicates whether the GR was created via the MyFi Matching App.
+**  Which is required in ABAP OO Class ZCL_FVIM_BADI_MKPF_CREATE to determine
+**  if to raise a WF event to tell the VIM WF to rerun business rules
+**  We need this WF when GR posted normally, but not when posted via Matching App
+**  as the matching app will do this itself when the submit button is pressed
+*  REFRESH lt_gm_create_extension.
+*  CLEAR: ls_gm_create_extension, ls_zbapi2017_gm_zmyfi.
+*  IF ( cs_purchaseorder_deep-vimdocid IS NOT INITIAL ).
+*    " This GR is being created from MyFi Matching App
+*    ls_zbapi2017_gm_zmyfi-zzvim_created_via_matching = 'X'.
+*  ELSE.
+*    " This GR is NOT being created from MyFi Matching App
+*    CLEAR: ls_zbapi2017_gm_zmyfi-zzvim_created_via_matching.
+*  ENDIF.
+*  ls_gm_create_extension-structure = zcl_fvim_constants=>gc_bapi2017_gm_zmyfi_extension.
+*  ls_gm_create_extension-valuepart1 = ls_zbapi2017_gm_zmyfi.
+*  APPEND ls_gm_create_extension TO lt_gm_create_extension.
+
+
+*--- process the GR's
+  LOOP AT lt_goodsmvt_header INTO ls_goodsmvt_header.
+
+    CLEAR:
+      lt_goodsmvt_item_2.
+
+    LOOP AT cs_purchaseorder_deep-movements INTO ls_purchaseordermovement
+    WHERE doc_date = ls_goodsmvt_header-doc_date
+    AND ref_doc_no = ls_goodsmvt_header-ref_doc_no
+    AND header_txt = ls_goodsmvt_header-header_txt.
+
+      CLEAR:
+        lt_goodsmvt_item,
+        lt_materialdocument,
+        lt_return.
+
+*--- convert to BAPI format gr item
+      ls_goodsmvt_item-move_type = '101'.
+      ls_goodsmvt_item-mvt_ind = 'B'.
+      ls_goodsmvt_item-po_number = cs_purchaseorder_deep-po_number.
+      ls_goodsmvt_item-po_item = ls_purchaseordermovement-po_item.
+      ls_goodsmvt_item-entry_qnt = ls_purchaseordermovement-entry_qnt.
+      READ TABLE cs_purchaseorder_deep-items INTO ls_purchaseorderitem
+        WITH KEY po_item = ls_purchaseordermovement-po_item
+        BINARY SEARCH.
+      IF sy-subrc = 0.
+        ls_goodsmvt_item-entry_uom = ls_purchaseorderitem-po_unit.
+        IF ls_purchaseorderitem-acctasscat = 'A'.
+          l_has_assetline = abap_true.
+        ENDIF.
+      ENDIF.
+      APPEND ls_goodsmvt_item TO lt_goodsmvt_item.
+      APPEND ls_goodsmvt_item TO lt_goodsmvt_item_2.
+
+*---> validation
+      IF i_test_mode EQ abap_true.
+*--- duplicate check
+        IF ls_purchaseordermovement-entry_qnt IS NOT INITIAL
+        AND ls_purchaseordermovement-doc_date IS NOT INITIAL
+        AND ls_purchaseordermovement-po_item IS NOT INITIAL.
+          SELECT mblnr AS mat_doc mjahr AS doc_year
+            FROM mseg
+            INTO CORRESPONDING FIELDS OF TABLE lt_materialdocument
+            WHERE budat_mkpf = ls_purchaseordermovement-doc_date
+              AND bpmng = ls_purchaseordermovement-entry_qnt
+              AND ebeln = cs_purchaseorder_deep-po_number
+              AND ebelp = ls_purchaseordermovement-po_item
+              AND shkzg = 'S'.
+          IF lines( lt_materialdocument ) > 0.
+            l_count = lines( lt_materialdocument ).
+            MESSAGE w003 WITH l_count INTO l_message.
+            lo_message_container->add_message(
+              iv_msg_type = sy-msgty
+              iv_msg_id = sy-msgid
+              iv_msg_number = sy-msgno
+              iv_msg_v1 = sy-msgv1
+              iv_add_to_response_header = abap_true ).
+            ls_purchaseordermovement-line_status = 'Warning'.
+            MODIFY cs_purchaseorder_deep-movements FROM ls_purchaseordermovement TRANSPORTING line_status.
+            APPEND LINES OF lt_materialdocument TO cs_purchaseorder_deep-materialdocuments.
+          ENDIF.
+        ENDIF.
+
+*--- date in future
+        IF ls_purchaseordermovement-doc_date > sy-datum.
+          MESSAGE e004 INTO l_message.
+          lo_message_container->add_message(
+            iv_msg_type = sy-msgty
+            iv_msg_id = sy-msgid
+            iv_msg_number = sy-msgno
+            iv_msg_v1 = sy-msgv1
+            iv_msg_v2 = sy-msgv2
+            iv_msg_v3 = sy-msgv3
+            iv_msg_v4 = sy-msgv4
+            iv_add_to_response_header = abap_true ).
+          ls_purchaseordermovement-doc_date_vs = 'Error'.
+          MODIFY cs_purchaseorder_deep-movements FROM ls_purchaseordermovement TRANSPORTING doc_date_vs.
+        ENDIF.
+
+*--- quantity less than 1
+        IF ls_purchaseordermovement-entry_qnt IS NOT INITIAL
+        AND ls_purchaseordermovement-entry_qnt < 1.
+          MESSAGE e005 INTO l_message.
+          lo_message_container->add_message(
+            iv_msg_type = sy-msgty
+            iv_msg_id = sy-msgid
+            iv_msg_number = sy-msgno
+            iv_msg_v1 = sy-msgv1
+            iv_msg_v2 = sy-msgv2
+            iv_msg_v3 = sy-msgv3
+            iv_msg_v4 = sy-msgv4
+            iv_add_to_response_header = abap_true ).
+          ls_purchaseordermovement-entry_qnt_vs = 'Error'.
+          MODIFY cs_purchaseorder_deep-movements FROM ls_purchaseordermovement TRANSPORTING entry_qnt_vs.
+        ENDIF.
+
+**--- if VIM warning if quantity does not match balance
+*        if cs_purchaseorder_deep-vimdocid is not initial
+*        and cs_purchaseorder_deep-vim_balance <> cs_purchaseorder_deep-gr_value.
+*
+*          l_amount = cs_purchaseorder_deep-vim_balance / 100.
+*          write l_amount to l_amount_str currency cs_purchaseorder_deep-vim_currency.
+*          shift l_amount_str left deleting leading space.
+*
+*          message w011 with l_amount_str cs_purchaseorder_deep-vim_currency into l_message.
+*          lo_message_container->add_message(
+*            iv_msg_type = sy-msgty
+*            iv_msg_id = sy-msgid
+*            iv_msg_number = sy-msgno
+*            iv_msg_v1 = sy-msgv1
+*            iv_msg_v2 = sy-msgv2
+*            iv_add_to_response_header = abap_true ).
+*
+*          ls_purchaseordermovement-line_status = 'Warning'.
+*          modify cs_purchaseorder_deep-movements from ls_purchaseordermovement transporting line_status.
+*        endif.
+
+*--- call the bapi in test mode (bapi call is wrapped in try/catch because of exceptions e.g. assets)
+        TRY.
+
+*--- export to db if has an asset line (used to supress "Sending of dynpro SAPLXMBC 0100")
+            IF l_has_assetline = abap_true.
+              l_export_id = lc_export_prefix && cs_purchaseorder_deep-po_number.
+              EXPORT p_file = sy-uname TO DATABASE indx(st) ID l_export_id.
+              IF sy-subrc = 0.
+                COMMIT WORK AND WAIT.
+              ELSE.
+                lo_message_container->add_message(
+                  iv_msg_type = sy-msgty
+                  iv_msg_id = sy-msgid
+                  iv_msg_number = sy-msgno
+                  iv_msg_v1 = sy-msgv1
+                  iv_msg_v2 = sy-msgv2
+                  iv_msg_v3 = sy-msgv3
+                  iv_msg_v4 = sy-msgv4
+                  iv_add_to_response_header = abap_true ).
+              ENDIF.
+            ENDIF.
+
+*--- bapi call
+            CALL FUNCTION 'BAPI_GOODSMVT_CREATE'
+              EXPORTING
+                goodsmvt_header = ls_goodsmvt_header
+                goodsmvt_code   = ls_goodsmvt_code
+                testrun         = abap_true
+              TABLES
+                goodsmvt_item   = lt_goodsmvt_item
+                return          = lt_return
+                extensionin     = lt_gm_create_extension.
+
+            IF lt_return IS NOT INITIAL.
+
+*--- replace ZFWORFLOW(019) with custom
+              READ TABLE lt_return INTO ls_return
+                WITH KEY type = 'E' id = 'ZFWORKFLOW' number = 019.
+              IF sy-subrc = 0.
+                DELETE lt_return INDEX sy-tabix.
+                MESSAGE e010 INTO l_message.
+                lo_message_container->add_message(
+                  iv_msg_type = sy-msgty
+                  iv_msg_id = sy-msgid
+                  iv_msg_number = sy-msgno
+                  iv_add_to_response_header = abap_true ).
+              ENDIF.
+
+*--- remove leading zeros (for custom error messages below)
+              CALL FUNCTION 'CONVERSION_EXIT_ALPHA_OUTPUT'
+                EXPORTING
+                  input  = ls_purchaseordermovement-po_item
+                IMPORTING
+                  output = ls_purchaseordermovement-po_item.
+
+*--- replace G/L system message with custom
+              LOOP AT lt_return INTO ls_return
+              WHERE type = 'E' AND id = 'M7' AND ( number = 161 OR number = 160 ).
+                DELETE lt_return INDEX sy-tabix.
+                CONCATENATE TEXT-aa1 ls_return-message_v1 INTO ls_return-message_v1 SEPARATED BY space.
+                CONCATENATE TEXT-pp1 ls_purchaseordermovement-po_item INTO ls_return-message_v2 SEPARATED BY space.
+                MESSAGE e009 WITH ls_return-message_v1 ls_return-message_v2 ac_ap_name ac_ap_email INTO l_message.
+                lo_message_container->add_message(
+                  iv_msg_type = sy-msgty
+                  iv_msg_id = sy-msgid
+                  iv_msg_number = sy-msgno
+                  iv_msg_v1 = sy-msgv1
+                  iv_msg_v2 = sy-msgv2
+                  iv_msg_v3 = sy-msgv3
+                  iv_msg_v4 = sy-msgv4
+                  iv_add_to_response_header = abap_true ).
+                ls_purchaseordermovement-line_status = 'Error'.
+                MODIFY cs_purchaseorder_deep-movements FROM ls_purchaseordermovement TRANSPORTING line_status.
+              ENDLOOP.
+
+*--- replace CC system message with custom
+              READ TABLE lt_return INTO ls_return
+                WITH KEY type = 'E' id = 'KI' number = 260.
+              IF sy-subrc = 0.
+                DELETE lt_return INDEX sy-tabix.
+                CONCATENATE TEXT-aa2 ls_return-message_v2 INTO ls_return-message_v1 SEPARATED BY space.
+                CONCATENATE TEXT-pp1 ls_purchaseordermovement-po_item INTO ls_return-message_v2 SEPARATED BY space.
+                MESSAGE e009 WITH ls_return-message_v1 ls_return-message_v2 ac_ap_name ac_ap_email INTO l_message.
+                lo_message_container->add_message(
+                  iv_msg_type = sy-msgty
+                  iv_msg_id = sy-msgid
+                  iv_msg_number = sy-msgno
+                  iv_msg_v1 = sy-msgv1
+                  iv_msg_v2 = sy-msgv2
+                  iv_msg_v3 = sy-msgv3
+                  iv_msg_v4 = sy-msgv4
+                  iv_add_to_response_header = abap_true ).
+                ls_purchaseordermovement-line_status = 'Error'.
+                MODIFY cs_purchaseorder_deep-movements FROM ls_purchaseordermovement TRANSPORTING line_status.
+              ENDIF.
+
+*--- replace WBS/IO system message with custom
+              READ TABLE lt_return INTO ls_return
+                WITH KEY type = 'E' id = 'BS' number = 013.
+              IF sy-subrc = 0.
+                DELETE lt_return INDEX sy-tabix.
+                CONCATENATE TEXT-pp1 ls_purchaseordermovement-po_item INTO ls_return-message_v3 SEPARATED BY space.
+                IF ls_return-message_v2(3) = 'ORD'.
+                  REPLACE FIRST OCCURRENCE OF 'ORD' IN ls_return-message_v2 WITH TEXT-aa4.
+                ENDIF.
+                MESSAGE e009 WITH ls_return-message_v2 ls_return-message_v3 ac_ap_name ac_ap_email INTO l_message.
+                lo_message_container->add_message(
+                  iv_msg_type = sy-msgty
+                  iv_msg_id = sy-msgid
+                  iv_msg_number = sy-msgno
+                  iv_msg_v1 = sy-msgv1
+                  iv_msg_v2 = sy-msgv2
+                  iv_msg_v3 = sy-msgv3
+                  iv_msg_v4 = sy-msgv4
+                  iv_add_to_response_header = abap_true ).
+                ls_purchaseordermovement-line_status = 'Error'.
+                MODIFY cs_purchaseorder_deep-movements FROM ls_purchaseordermovement TRANSPORTING line_status.
+              ENDIF.
+
+*--- replace quantity exceeded system message with custom
+              READ TABLE lt_return INTO ls_return
+                WITH KEY type = 'E' id = 'M7' number = 022.
+              IF sy-subrc = 0.
+                DELETE lt_return INDEX sy-tabix.
+                MESSAGE e006 WITH ls_purchaseordermovement-po_item INTO l_message.
+                lo_message_container->add_message(
+                  iv_msg_type = sy-msgty
+                  iv_msg_id = sy-msgid
+                  iv_msg_number = sy-msgno
+                  iv_msg_v1 = sy-msgv1
+                  iv_add_to_response_header = abap_true ).
+                ls_purchaseordermovement-entry_qnt_vs = 'Error'.
+                MODIFY cs_purchaseorder_deep-movements FROM ls_purchaseordermovement TRANSPORTING entry_qnt_vs.
+              ENDIF.
+
+*--- delete po_item & qty missing messages (already handled in UI)
+              DELETE lt_return WHERE type = 'E' AND id = 'M7' AND number = 001.
+              DELETE lt_return WHERE type = 'E' AND id = 'M7' AND number = 264.
+
+*--- return any remaining bapi messages
+              lo_message_container->add_messages_from_bapi(
+                it_bapi_messages = lt_return
+                iv_add_to_response_header = abap_true ).
+
+            ENDIF.
+
+*--- catch exceptions
+          CATCH cx_root INTO lx_root.
+            l_message = lx_root->get_text( ).
+            lo_message_container->add_message_text_only(
+              iv_msg_type = /iwbep/if_message_container=>gcs_message_type-error
+              iv_msg_text = l_message
+              iv_add_to_response_header = abap_true ).
+        ENDTRY.
+      ENDIF.
+    ENDLOOP.
+
+*--- call the bapi for real (once per header line)
+    IF i_test_mode = abap_false.
+
+      CLEAR:
+        ls_materialdocument,
+        lt_return.
+
+      TRY.
+
+          CALL FUNCTION 'BAPI_GOODSMVT_CREATE'
+            EXPORTING
+              goodsmvt_header  = ls_goodsmvt_header
+              goodsmvt_code    = ls_goodsmvt_code
+              testrun          = abap_false
+            IMPORTING
+              materialdocument = ls_materialdocument-mat_doc
+              matdocumentyear  = ls_materialdocument-doc_year
+            TABLES
+              goodsmvt_item    = lt_goodsmvt_item_2
+              return           = lt_return
+              extensionin      = lt_gm_create_extension.
+          IF lt_return IS NOT INITIAL.
+            lo_message_container->add_messages_from_bapi(
+              it_bapi_messages = lt_return
+              iv_add_to_response_header = abap_true ).
+          ELSEIF ls_materialdocument-mat_doc IS NOT INITIAL.
+*--- not test mode save the data
+            COMMIT WORK AND WAIT.
+            IF sy-subrc = 0.
+              APPEND ls_materialdocument TO cs_purchaseorder_deep-materialdocuments.
+
+*--- if VIM update the vim gr table
+              IF cs_purchaseorder_deep-vimdocid IS NOT INITIAL.
+
+*===> TODO:
+**--- get the line item number from mseg
+*                SELECT zeile AS grdocitem
+*                  FROM mseg
+*                  INTO CORRESPONDING FIELDS OF TABLE lt_vim_gr
+*                  WHERE mblnr = ls_materialdocument-mat_doc
+*                    AND mjahr = ls_materialdocument-doc_year.
+*
+*                LOOP AT lt_vim_gr ASSIGNING <ls_vim_gr>.
+*                  <ls_vim_gr>-grdocnumber = ls_materialdocument-mat_doc.
+*                  <ls_vim_gr>-grdocyear = ls_materialdocument-doc_year.
+*                  <ls_vim_gr>-vimdocid = cs_purchaseorder_deep-vimdocid.
+*                  <ls_vim_gr>-po_number = cs_purchaseorder_deep-po_number.
+*                  <ls_vim_gr>-po_item = ls_purchaseordermovement-po_item.
+*                  <ls_vim_gr>-entrydate = sy-datum.
+*                  <ls_vim_gr>-deliverydate = ls_purchaseordermovement-doc_date.
+*                  <ls_vim_gr>-headertext = ls_purchaseordermovement-header_txt.
+*                  <ls_vim_gr>-deliverynote = ls_purchaseordermovement-ref_doc_no.
+*                  <ls_vim_gr>-quantitydelivered = ls_purchaseordermovement-entry_qnt.
+*                  <ls_vim_gr>-uom = ls_purchaseordermovement-entry_uom.
+*                  <ls_vim_gr>-selectedgr = abap_true.
+*                ENDLOOP.
+*                MODIFY zvim_gr_app_gr FROM TABLE lt_vim_gr.
+
+              ENDIF.
+
+            ELSE.
+              lo_message_container->add_message(
+                iv_msg_type = sy-msgty
+                iv_msg_id = sy-msgid
+                iv_msg_number = sy-msgno
+                iv_msg_v1 = sy-msgv1
+                iv_msg_v2 = sy-msgv2
+                iv_msg_v3 = sy-msgv3
+                iv_msg_v4 = sy-msgv4
+                iv_add_to_response_header = abap_true ).
+            ENDIF.
+          ELSE.
+            MESSAGE e002 WITH ls_purchaseordermovement-po_item INTO l_message.
+            lo_message_container->add_message(
+              iv_msg_type = sy-msgty
+              iv_msg_id = sy-msgid
+              iv_msg_number = sy-msgno
+              iv_msg_v1 = sy-msgv1
+              iv_add_to_response_header = abap_true ).
+          ENDIF.
+
+*--- delete the import
+          IMPORT p_file = l_uname FROM DATABASE indx(st) ID l_export_id.
+          IF sy-subrc = 0 AND l_uname = sy-uname.
+            DELETE FROM DATABASE indx(st) ID l_export_id.
+          ENDIF.
+
+*--- catch other exceptions
+        CATCH cx_root INTO lx_root.
+          l_message = lx_root->get_text( ).
+          lo_message_container->add_message_text_only(
+            iv_msg_type = /iwbep/if_message_container=>gcs_message_type-error
+            iv_msg_text = l_message
+            iv_add_to_response_header = abap_true ).
+      ENDTRY.
+    ENDIF.
+
+  ENDLOOP.
+
+*--- sort and delete duplicates for display
+  SORT cs_purchaseorder_deep-materialdocuments BY doc_year mat_doc.
+  DELETE ADJACENT DUPLICATES FROM cs_purchaseorder_deep-materialdocuments.
+
+  l_msgty = lo_message_container->get_worst_message_type( ).
+
+  IF i_test_mode EQ abap_false
+  AND l_msgty NE /iwbep/if_message_container=>gcs_message_type-error
+  AND l_msgty NE /iwbep/if_message_container=>gcs_message_type-abort
+  AND l_msgty NE /iwbep/if_message_container=>gcs_message_type-termination.
+    CLEAR cs_purchaseorder_deep-movements.
+  ENDIF.
+
+ENDMETHOD.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Private Method ZCL_ZLFC_GR_DPC_EXT->_FIELD_IS_OFF
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_FELEI                        TYPE        FELEI
+* | [--->] I_FEGRU                        TYPE        FEGRU
+* | [<-()] R_IS_OFF                       TYPE        SAP_BOOL
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method _FIELD_IS_OFF.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Helper Method check screen layout on/off setting for fields
+* NOTES:
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  22.05.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 30.11.2020 220977FKC RD2K920449 6000002172 S 6000002172: MyFi Purchasing (Release 2.3)
+*-----------------------------------------------------------------------------------------
+
+  select single fnein
+    from t082g
+    into r_is_off
+    where fegtb = 'A'
+      and felei = i_felei
+      and fegru = i_fegru.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Private Method ZCL_ZLFC_GR_DPC_EXT->_READ_GR
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_MAT_DOC                      TYPE        MBLNR
+* | [--->] I_DOC_YEAR                     TYPE        MJAHR
+* | [<-()] RS_GOODSRECEIPT_DEEP           TYPE        TY_GOODSRECEIPT_DEEP
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method _read_gr.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Helper Method to read a Goods Receipt details
+* NOTES:
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  22.05.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 22.05.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+* 21.10.2020 220977FKC RD2K919880 6000002064 VIM Integration with MyFi
+*-----------------------------------------------------------------------------------------
+
+  data:
+    lo_message_container type ref to /iwbep/if_message_container,
+    ls_goodsreceiptitem  type zcl_zlfc_gr_mpc=>ts_goodsreceiptitem,
+    ls_header            type bapi2017_gm_head_02,
+    lt_item_show         type standard table of bapi2017_gm_item_show,
+    lt_item              type sorted table of bapi2017_gm_item_show
+                           with non-unique key mat_doc doc_year po_number po_item,
+    ls_item              like line of lt_item,
+    lt_mseg              type hashed table of ty_mat_line
+                           with unique key
+                              zeile,
+    ls_mseg              like line of lt_mseg,
+    lt_xekbez            type standard table of ekbez,
+    ls_xekbez            like line of lt_xekbez,
+    lt_xekbes            type standard table of ekbes,
+    ls_xekbes            like line of lt_xekbes,
+    l_bsart              type esart,
+    lt_ekpo              type hashed table of ty_po_line
+                           with unique key ebelp,
+    ls_ekpo              like line of lt_ekpo,
+    l_mblnr              type mblnr,
+    lt_return            type bapiret2_t.
+
+  field-symbols:
+    <ls_item>            like line of lt_item.
+
+*--- message container setup
+  lo_message_container = mo_context->get_message_container( ).
+
+*--- read GR details
+  call function 'BAPI_GOODSMVT_GETDETAIL'
+    exporting
+      materialdocument = i_mat_doc
+      matdocumentyear  = i_doc_year
+    importing
+      goodsmvt_header  = ls_header
+    tables
+      goodsmvt_items   = lt_item_show
+      return           = lt_return.
+  if lt_return is not initial.
+    lo_message_container->add_messages_from_bapi(
+      it_bapi_messages = lt_return
+      iv_add_to_response_header = abap_true ).
+
+    rs_goodsreceipt_deep-doc_year = '0001'.
+  else.
+*--- header details
+    rs_goodsreceipt_deep-mat_doc = i_mat_doc.
+    rs_goodsreceipt_deep-doc_year = i_doc_year.
+    rs_goodsreceipt_deep-username = ls_header-username.
+
+*--- lookup full name
+  select single name_text
+    from v_usr_name
+    into @data(l_name_text)
+    where bname = @ls_header-username.
+  if l_name_text is not initial.
+    rs_goodsreceipt_deep-username_full = l_name_text.
+  else.
+    rs_goodsreceipt_deep-username_full = ls_header-username.
+  endif.
+
+*--- read mseg for fields not returned by bapi
+    select zeile shkzg
+      from mseg
+      into corresponding fields of table lt_mseg
+      where mblnr = i_mat_doc
+        and mjahr = i_doc_year.
+
+*--- prepare items ... for gr lines that relate to the same po line item these
+*    get combined into one so that the history checking logic below works correctly
+*    otherwise the balance check is per split and is not always correct
+    sort lt_item_show by mat_doc doc_year po_number po_item matdoc_itm.
+
+    loop at lt_item_show into ls_item.
+      read table lt_item assigning <ls_item> with table key
+          mat_doc = ls_item-mat_doc
+          doc_year = ls_item-doc_year
+          po_number = ls_item-po_number
+          po_item = ls_item-po_item.
+      if sy-subrc = 0.
+        add ls_item-entry_qnt to <ls_item>-entry_qnt.
+        add ls_item-po_pr_qnt to <ls_item>-po_pr_qnt.
+        add ls_item-amount_lc to <ls_item>-amount_lc.
+        add ls_item-amount_sv to <ls_item>-amount_sv.
+      else.
+        insert ls_item into table lt_item.
+      endif.
+    endloop.
+
+*--- gr item details
+    loop at lt_item into ls_item.
+
+*--- po details once only
+      if rs_goodsreceipt_deep-po_number is initial.
+
+*---- lookup further po details
+        select single bsart waers
+          from ekko
+          into (l_bsart, rs_goodsreceipt_deep-currency)
+          where ebeln = ls_item-po_number.
+        if l_bsart <> ac_standard_po.
+          rs_goodsreceipt_deep-mat_doc = '_'.
+          exit.
+        endif.
+
+        rs_goodsreceipt_deep-po_number = ls_item-po_number.
+        rs_goodsreceipt_deep-vendor = ls_item-vendor.
+
+*---- vendor name
+        select single name1
+          from lfa1
+          into rs_goodsreceipt_deep-vendor_name
+          where lifnr = ls_item-vendor.
+
+*--- lookup po line item details not supplied by BAPI above
+        select ebelp loekz txz01 netpr mwskz webre effwr knttp
+          from ekpo
+          into corresponding fields of table lt_ekpo
+          where ebeln = ls_item-po_number.
+
+*--- is myfi flag (after legacy enablement all NB's are now 'MyFi')
+        rs_goodsreceipt_deep-po_is_myfi = abap_true.
+
+      endif.
+
+*--- gr display item details
+      clear ls_goodsreceiptitem.
+      ls_goodsreceiptitem-selected = abap_true.
+      ls_goodsreceiptitem-line_status = 'None'.
+      ls_goodsreceiptitem-ref_doc_no = ls_header-ref_doc_no.
+      ls_goodsreceiptitem-header_txt = ls_header-header_txt.
+      ls_goodsreceiptitem-doc_date = ls_header-doc_date.
+      ls_goodsreceiptitem-matdoc_itm = ls_item-matdoc_itm.
+      ls_goodsreceiptitem-po_item = ls_item-po_item.
+      ls_goodsreceiptitem-entry_uom = ls_item-entry_uom.
+      ls_goodsreceiptitem-entry_qnt = ls_item-entry_qnt.
+
+      read table lt_mseg into ls_mseg
+        with table key
+          zeile = ls_item-matdoc_itm.
+      if sy-subrc = 0.
+        if ls_mseg-shkzg ne 'S'.
+          ls_goodsreceiptitem-entry_qnt = - ls_goodsreceiptitem-entry_qnt.
+        endif.
+      endif.
+
+*--- check revesred
+      select single mblnr
+        from mseg
+        into l_mblnr
+        where smbln = i_mat_doc
+          and sjahr = i_doc_year
+          and smblp = ls_item-matdoc_itm.
+      if sy-subrc = 0.
+        ls_goodsreceiptitem-reversed = abap_true.
+      endif.
+
+*--- po line item details
+      clear ls_ekpo.
+      read table lt_ekpo into ls_ekpo
+        with table key
+          ebelp = ls_item-po_item.
+      if sy-subrc = 0.
+        ls_goodsreceiptitem-short_text = ls_ekpo-txz01.
+        ls_goodsreceiptitem-net_price = ls_ekpo-netpr.
+        ls_goodsreceiptitem-tax_code = ls_ekpo-mwskz.
+      endif.
+
+*--- exclusions: deleted/blocked lines, acct assignment asset unknown
+      if ls_ekpo-knttp = 'X'
+      or ls_ekpo-loekz is not initial.
+        ls_goodsreceiptitem-no_more_gr = abap_true.
+      else.
+
+*--- check quantity remaining to ensure it can and flag if it can be canclled or not
+*    NOTE: all lines are returned to the front end because the are always displayed in view
+*    mode but hidden (by the app) in cancel mode
+        clear lt_xekbes.
+        clear lt_xekbez.
+        call function 'ME_READ_HISTORY'
+          exporting
+            ebeln  = ls_item-po_number
+            ebelp  = ls_item-po_item
+            webre  = abap_true
+          tables
+            xekbes = lt_xekbes
+            xekbez = lt_xekbez.
+        if sy-subrc = 0.
+*--- if gr based IV flag is set then check that:
+*    (a) quantity remaining is equal to quantity to be cancelled, and
+*    (b) no amount has been invoiced
+          if ls_ekpo-webre = abap_true.
+            read table lt_xekbez into ls_xekbez
+              with key
+                ebelp	= ls_item-po_item
+                zekkn	= 00
+                lfgja	= i_doc_year
+                lfbnr = i_mat_doc
+                lfpos	= ls_item-matdoc_itm.
+            if sy-subrc = 0.
+              if ls_xekbez-bpmng <> ls_item-entry_qnt
+              or ls_xekbez-bprem is not initial.
+                ls_goodsreceiptitem-no_more_gr = abap_true.
+              endif.
+            endif.
+          else.
+*--- if gr based IV flag is NOT set then check that the amount to be
+*    cancelled is greater than gr - ir amount for at line level
+*    (because we cannot check at material doc level with gr based IV)
+            read table lt_xekbes into ls_xekbes
+              with key
+                ebelp	= ls_item-po_item
+                zekkn	= 00.
+            if sy-subrc = 0.
+              if ls_goodsreceiptitem-entry_qnt > ( ls_xekbes-bpmng - ls_xekbes-bprem ).
+                ls_goodsreceiptitem-no_more_gr = abap_true.
+              endif.
+            endif.
+          endif.
+        endif.
+      endif.
+
+      append ls_goodsreceiptitem to rs_goodsreceipt_deep-items.
+    endloop.
+
+*--- total po value
+    loop at lt_ekpo into ls_ekpo where loekz ne 'L'.
+      add ls_ekpo-effwr to rs_goodsreceipt_deep-total_value.
+    endloop.
+
+*--- total po value
+    call function 'CURRENCY_AMOUNT_SAP_TO_BAPI'
+      exporting
+        currency    = rs_goodsreceipt_deep-currency
+        sap_amount  = rs_goodsreceipt_deep-total_value
+      importing
+        bapi_amount = rs_goodsreceipt_deep-total_value.
+
+  endif.
+
+endmethod.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Private Method ZCL_ZLFC_GR_DPC_EXT->_READ_PO
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] I_PO_NUMBER                    TYPE        CHAR12
+* | [<-()] RS_PURCHASEORDER_DEEP          TYPE        TY_PURCHASEORDER_DEEP
+* | [!CX!] /IWBEP/CX_MGW_BUSI_EXCEPTION
+* | [!CX!] /IWBEP/CX_MGW_TECH_EXCEPTION
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+method _read_po.
+*-----------------------------------------------------------------------------------------
+* DESCRIPTION:  Helper Method to read Purchase Order details
+*
+* AUTHOR:       Fred Chelashaw
+* CREATE DATE:  01.04.2020
+*
+* ACTIVITY:     AD-11-32-10 - MyFi Purchase Receipting
+* DEV SCRIPT:   DS-11-32-10-01 - MyFi Purchase Receipting App
+*-----------------------------------------------------------------------------------------
+* VERSION CONTROL:
+*
+* Date       Author    CTS Req    SCR        Description
+* ---------- --------- ---------- ---------- ---------------------------------------------
+* 01.04.2020 220977FKC RD2K919103 6000001870 DFG BAR 2020-02 MyFi Purchase Receipting
+* 21.10.2020 220977FKC RD2K919880 6000002064 VIM Integration with MyFi
+* 30.11.2020 220977FKC RD2K920449 6000002172 MyFi Purchasing (Release 2.3)
+*-----------------------------------------------------------------------------------------
+
+  data:
+    lo_message_container type ref to /iwbep/if_message_container,
+    ls_purchaseorderitem type zcl_zlfc_gr_mpc=>ts_purchaseorderitem,
+    ls_header            type bapimepoheader,
+    l_ebeln              type ebeln,
+    l_frgrl	             type frgrl,
+    lt_return            type bapiret2_t,
+    lt_item              type standard table of bapimepoitem,
+    ls_item              like line of lt_item,
+    lt_history           type standard table of bapiekbe,
+    lt_history_total     type standard table of bapiekbes,
+    ls_history_total     like line of lt_history_total,
+    lt_po_line           type hashed table of ty_po_line
+                           with unique key ebelp,
+    ls_po_line           like line of lt_po_line,
+    lt_tax_code          type hashed table of ty_tax_code
+                           with unique key mwskz,
+    ls_tax_code          like line of lt_tax_code,
+    lt_vim_selected      type standard table of ty_vim_selected,
+    ls_vim_selected      like line of lt_vim_selected.
+
+*--- message container setup
+  lo_message_container = mo_context->get_message_container( ).
+
+*--- check if a vim document
+  if strlen( i_po_number ) = 12.
+    rs_purchaseorder_deep-vimdocid = i_po_number.
+    select single ebeln xblnr gross_amount waers
+      from /opt/vim_1head
+      into (l_ebeln, rs_purchaseorder_deep-invnumber, rs_purchaseorder_deep-vim_invoice_amount, rs_purchaseorder_deep-vim_currency)
+      where docid = rs_purchaseorder_deep-vimdocid.
+  else.
+    l_ebeln = i_po_number.
+  endif.
+
+*--- get po detail
+  call function 'BAPI_PO_GETDETAIL1'
+    exporting
+      purchaseorder    = l_ebeln
+    importing
+      poheader         = ls_header
+    tables
+      return           = lt_return
+      poitem           = lt_item
+      pohistory        = lt_history
+      pohistory_totals = lt_history_total.
+  if sy-subrc <> 0.
+    lo_message_container->add_messages_from_bapi(
+      it_bapi_messages = lt_return
+      iv_add_to_response_header = abap_true ).
+  endif.
+*--- if not 'NB' mark as excluded
+
+  if ls_header-po_number is initial.
+
+  elseif ls_header-doc_type <> ac_standard_po.
+    rs_purchaseorder_deep-excluded = abap_true.
+    rs_purchaseorder_deep-po_number = l_ebeln.
+  else.
+
+*--- header details from BAPI
+    move-corresponding ls_header to rs_purchaseorder_deep.
+
+*--- check if in held state
+    if ls_header-memory ne abap_true.
+      rs_purchaseorder_deep-complete = abap_true.
+    endif.
+
+*--- po release flag (not supplied by the above BAPI)
+    select single frgrl
+      from ekko
+      into l_frgrl
+      where ebeln = ls_header-po_number.
+
+    if l_frgrl ne abap_true.
+      rs_purchaseorder_deep-approved = abap_true.
+    endif.
+
+*--- get vendor name
+    select single name1
+      from lfa1
+      into rs_purchaseorder_deep-vendor_name
+      where lifnr = ls_header-vendor.
+
+*---> is myfi flag (after legacy enablement all NB's are now 'MyFi')
+    rs_purchaseorder_deep-is_my_fi = abap_true.
+
+*--- lookup PO line item value (not supplied by the above BAPI)
+    select ebelp effwr
+      from ekpo
+      into corresponding fields of table lt_po_line
+      where ebeln = l_ebeln.
+
+*--- lookup tax codes
+    select tt~mwskz kk~kbetr
+    from t007a as tt
+      inner join a003 as aa
+      on aa~mwskz = tt~mwskz
+      inner join konp as kk
+      on kk~knumh = aa~knumh and kk~kopos = 01
+    into corresponding fields of table lt_tax_code
+    where tt~kalsm = ac_taxau
+      and tt~mwskz like 'P%'
+      and ( aa~kschl = 'ZZ02' or aa~kschl = 'ZZ04' )
+      and aa~aland = 'AU'.
+
+*--- convert to entity format items
+    loop at lt_item into ls_item.
+
+*----> convert to entity item format
+      clear ls_purchaseorderitem.
+
+*---> line effective value
+      read table lt_po_line into ls_po_line
+        with table key
+          ebelp = ls_item-po_item.
+      if sy-subrc = 0.
+        ls_purchaseorderitem-effective_value = ls_po_line-effwr.
+        call function 'CURRENCY_AMOUNT_SAP_TO_BAPI'
+          exporting
+            currency    = rs_purchaseorder_deep-currency
+            sap_amount  = ls_purchaseorderitem-effective_value
+          importing
+            bapi_amount = ls_purchaseorderitem-effective_value.
+        if ls_item-delete_ind ne 'L'.
+          add ls_po_line-effwr to rs_purchaseorder_deep-total_value.
+        endif.
+      endif.
+
+*---> line exclusions:
+      if ls_item-gr_ind is initial            " GR flag not set
+      or ls_item-no_more_gr is not initial    " No more GR flag set
+      or ls_item-delete_ind is not initial    " Deletion indicator
+      or ls_item-final_inv is not initial     " Final invoice indicator
+      or ls_item-acctasscat = 'X'.            " Asset Unknown Account Assignment
+        continue.
+      endif.
+
+*----> convert to entity item format
+      move-corresponding ls_item to ls_purchaseorderitem.
+
+*----> is account assignment asset
+      if ls_item-acctasscat = 'A'.
+
+*-----> skip is user has no asset auth
+        authority-check object 'A_B_ANLKL'
+          id 'BUKRS' field rs_purchaseorder_deep-comp_code
+          id 'ACTVT' field '01'.
+        if sy-subrc <> 0.
+          continue.
+        else.
+
+*-----> if user has auth set asset flags and load asset keys
+          rs_purchaseorder_deep-has_asset = abap_true.
+          ls_purchaseorderitem-is_asset = abap_true.
+
+          select ebelp as po_item
+              anln1 as asset_no
+              anln2 as sub_number
+            from ekkn
+            appending corresponding fields of table rs_purchaseorder_deep-assets
+            where ebeln = ls_header-po_number
+              and ebelp = ls_item-po_item.
+
+        endif.
+      endif.
+
+*----> calcualte quantity remaining
+      loop at lt_history_total into ls_history_total where po_item = ls_item-po_item.
+        add ls_history_total-deliv_qty to ls_purchaseorderitem-quantity_delivered.
+      endloop.
+      ls_purchaseorderitem-quantity_remaining = ls_purchaseorderitem-quantity - ls_purchaseorderitem-quantity_delivered.
+      if ls_purchaseorderitem-quantity_remaining is initial.
+        continue.
+      endif.
+
+*---> tax code
+      read table lt_tax_code into ls_tax_code
+        with table key
+          mwskz = ls_item-tax_code.
+      if sy-subrc = 0.
+        ls_purchaseorderitem-tax_rate = ls_tax_code-kbetr / 1000.
+      endif.
+
+*----> append entity item
+      append ls_purchaseorderitem to rs_purchaseorder_deep-items.
+
+    endloop.
+
+*--- total po value
+    call function 'CURRENCY_AMOUNT_SAP_TO_BAPI'
+      exporting
+        currency    = rs_purchaseorder_deep-currency
+        sap_amount  = rs_purchaseorder_deep-total_value
+      importing
+        bapi_amount = rs_purchaseorder_deep-total_value.
+
+*---> if is VIM more details
+    if rs_purchaseorder_deep-vimdocid is not initial.
+
+*--- vim invoice amount
+      call function 'CURRENCY_AMOUNT_SAP_TO_BAPI'
+        exporting
+          currency    = rs_purchaseorder_deep-vim_currency
+          sap_amount  = rs_purchaseorder_deep-vim_invoice_amount
+        importing
+          bapi_amount = rs_purchaseorder_deep-vim_invoice_amount.
+
+*===> TODO:
+**--- vim matching app selected gr's
+*      select taxamount valueextax
+*        from zvim_gr_app_gr
+*        into corresponding fields of table lt_vim_selected
+*        where vimdocid = rs_purchaseorder_deep-vimdocid
+*          and selectedgr = abap_true.
+*
+**--- calculate vim balance
+*      rs_purchaseorder_deep-vim_balance = rs_purchaseorder_deep-vim_invoice_amount.
+*      loop at lt_vim_selected into ls_vim_selected.
+*        subtract ls_vim_selected-valueextax from rs_purchaseorder_deep-vim_balance.
+*        subtract ls_vim_selected-taxamount from rs_purchaseorder_deep-vim_balance.
+*      endloop.
+
+    endif.
+
+  endif.
+
+endmethod.
+ENDCLASS.

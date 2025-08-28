@@ -1,0 +1,19 @@
+<mvc:View
+	controllerName="au.gov.defence.roman.zfss.gr.controller.NotFound"
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc">
+
+	<MessagePage
+		title="{i18n>notFoundTitle}"
+		text="{i18n>notFoundText}"
+		icon="sap-icon://document"
+		id="notFoundPage"
+		showNavButton="true"
+		navButtonPress=".onNavBack"
+		description="">
+		<customDescription>
+			<Link text="{i18n>notFoundLinkText}" press=".onLinkPressed"/>
+		</customDescription>
+	</MessagePage>
+
+</mvc:View>

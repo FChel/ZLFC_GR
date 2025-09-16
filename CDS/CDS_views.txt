@@ -1,0 +1,525 @@
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_ASSET_FLDCTL'
+@EndUserText.label: 'Asset Field Control Settings'
+@VDM.viewType: #BASIC
+
+define view ZI_GR_AssetFieldControl
+  as select from anka
+    inner join t082g on t082g.felei = anka.felei
+{
+  key anka.anlkl as AssetClass,
+  key t082g.fegru as FieldGroup,
+      
+      anka.felei as FieldLayout,
+      t082g.fnein as FieldIsOff,
+      
+      -- Specific field checks
+      case t082g.fegru
+        when '07' then t082g.fnein  -- Main Description
+        when '37' then t082g.fnein  -- Note
+        when '04' then t082g.fnein  -- Inventory Number
+        when '75' then t082g.fnein  -- Serial Number
+        when '19' then t082g.fnein  -- Room
+        when '14' then t082g.fnein  -- License Plate
+        else ''
+      end as FieldOffFlag
+}
+where t082g.fegtb = 'A'
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_ASSET_MASTER'
+@AbapCatalog.compiler.compareFilter: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Asset Master Data for Goods Receipt'
+@VDM.viewType: #COMPOSITE
+@ObjectModel.usageType.dataClass: #MASTER
+@ObjectModel.usageType.serviceQuality: #B
+
+define view ZI_ZLFC_GR_AssetMasterData
+  as select from anla
+    inner join   anlz on  anlz.bukrs = anla.bukrs
+                      and anlz.anln1 = anla.anln1
+                      and anlz.anln2 = anla.anln2
+    left outer join anlh on  anlh.bukrs = anla.bukrs
+                         and anlh.anln1 = anla.anln1
+{
+  key anla.bukrs    as CompanyCode,
+  key anla.anln1    as AssetNumber,
+  key anla.anln2    as SubNumber,
+      
+      anla.anlkl    as AssetClass,
+      anla.invzu    as InventoryNote,
+      anla.invnr    as InventoryNumber,
+      anla.sernr    as SerialNumber,
+      anlh.anlhtxt  as AssetDescription,
+      
+      anlz.kostl    as CostCenter,
+      anlz.stort    as Location,
+      anlz.raumn    as Room,
+      anlz.kfzkz    as LicensePlateNumber,
+      anlz.bdatu    as ValidFrom,
+      anlz.adatu    as ValidTo,
+      
+      -- For current date filtering
+      case when anlz.bdatu >= $session.system_date 
+           and anlz.adatu <= $session.system_date
+           then 'X'
+           else ''
+      end as IsCurrentlyValid
+}
+
+
+
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Goods Receipt Documents'
+@Metadata.ignorePropagatedAnnotations: true
+@AbapCatalog.sqlViewName: 'ZV_GR_DOCUMENTS'
+@VDM.viewType: #COMPOSITE
+
+define view ZI_GR_GoodsReceiptDocs
+  as select from mkpf
+    inner join mseg on  mseg.mblnr = mkpf.mblnr
+                    and mseg.mjahr = mkpf.mjahr
+{
+  key mkpf.mblnr      as MaterialDocument,
+  key mkpf.mjahr      as DocumentYear,
+  key mseg.zeile      as DocumentItem,
+      
+      mkpf.blart      as DocumentType,
+      mkpf.bldat      as DocumentDate,
+      mkpf.budat      as PostingDate,
+      mkpf.usnam      as UserName,
+      mkpf.xblnr      as ReferenceDocument,
+      mkpf.bktxt      as HeaderText,
+      
+      mseg.bwart      as MovementType,
+      mseg.shkzg      as DebitCreditIndicator,
+      mseg.matnr      as Material,
+      mseg.werks      as Plant,
+      mseg.lgort      as StorageLocation,
+      
+      mseg.ebeln      as PurchaseOrder,
+      mseg.ebelp      as PurchaseOrderItem,
+      
+      @Semantics.quantity.unitOfMeasure: 'EntryUnit'
+      mseg.menge      as Quantity,
+      mseg.meins      as EntryUnit,
+      
+      @Semantics.quantity.unitOfMeasure: 'OrderUnit'
+      mseg.bpmng      as QuantityInOrderUnit,
+      mseg.bprme      as OrderUnit,
+      
+      @Semantics.amount.currencyCode: 'Currency'
+      mseg.dmbtr      as AmountInLocalCurrency,
+      mseg.waers      as Currency,
+      
+      -- Reversal information
+      mseg.smbln      as ReversalDocument,
+      mseg.sjahr      as ReversalYear,
+      mseg.smblp      as ReversalItem,
+      
+      case when mseg.smbln != ''
+           then 'X'
+           else ''
+      end as IsReversed,
+      
+      -- Adjusted quantity (negative for cancellations)
+      case when mseg.shkzg = 'H'
+           then mseg.menge * -1
+           else mseg.menge
+      end as AdjustedQuantity
+}
+
+
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'PO Asset Assignments for GR'
+@Metadata.ignorePropagatedAnnotations: true
+@AbapCatalog.sqlViewName: 'ZV_PO_ASSETS_GR'
+@VDM.viewType: #BASIC
+
+define view ZI_GR_POAssetAssignments
+  as select from ekkn
+    inner join ekko on ekkn.ebeln = ekko.ebeln
+{
+  key ekkn.ebeln as PurchaseOrder,
+  key ekkn.ebelp as PurchaseOrderItem,
+  key ekkn.zekkn as AccountAssignmentNumber,
+      
+      ekkn.anln1 as AssetNumber,
+      ekkn.anln2 as SubNumber,
+      ekko.bukrs as CompanyCode,
+      ekkn.kokrs as ControllingArea,
+      ekkn.kostl as CostCenter,
+      ekkn.aufnr as InternalOrder,
+      ekkn.ps_psp_pnr as WBSElement
+}
+where anln1 != ''
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_GR_PO_MAIN'
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Complete Purchase Order Data for GR'
+@VDM.viewType: #COMPOSITE
+@ObjectModel.usageType.dataClass: #TRANSACTIONAL
+@ObjectModel.usageType.serviceQuality: #A
+
+define view ZI_ZLFC_GR_POComplete
+  as select from ZI_ZLFC_GR_PurchaseOrderHeader as Header
+    left outer join ZI_ZLFC_GR_PurchaseOrderItems as Items 
+      on Items.PurchaseOrder = Header.PurchaseOrder
+    left outer join ZI_GR_POAssetAssignments as Assets
+      on Assets.PurchaseOrder = Header.PurchaseOrder    
+    association [0..*] to ZI_ZLFC_GR_PurchaseOrderItems as _Items 
+      on _Items.PurchaseOrder = Header.PurchaseOrder
+    association [0..*] to ZI_GR_POAssetAssignments as _Assets
+      on _Assets.PurchaseOrder = Header.PurchaseOrder
+    association [0..*] to ZI_GR_PurchaseOrderHistory as _History
+      on _History.PurchaseOrder = Header.PurchaseOrder
+{
+  key Header.PurchaseOrder,
+      
+      Header.CompanyCode,
+      Header.DocumentType,
+      Header.Vendor,
+      Header.VendorName,
+      Header.Currency,
+      Header.DocumentDate,
+      Header.CreatedBy,
+      
+      -- Status
+      Header.IsComplete,
+      Header.IsApproved,
+      Header.IsStandardPO,
+      Header.IsMyFiEnabled,
+      
+      -- Calculated total value
+      @Semantics.amount.currencyCode: 'Currency'
+      sum(case when Items.DeletionIndicator != 'L' 
+               then Items.EffectiveValue 
+               else cast(0 as abap.curr(15,2))
+          end) as TotalValue,
+          
+      -- Asset count
+      count(distinct Assets.AssetNumber) as AssetCount,
+                      
+      -- Available items count
+      sum(case when Items.AvailableForGR = 'X' 
+               then 1 
+               else 0 
+          end) as AvailableItemsCount,          
+          
+      -- Associations
+      _Items,
+      _Assets,
+      _History
+}
+group by Header.PurchaseOrder, Header.CompanyCode, Header.DocumentType,
+         Header.Vendor, Header.VendorName, Header.Currency,
+         Header.DocumentDate, Header.CreatedBy, Header.IsComplete,
+         Header.IsApproved, Header.IsStandardPO, Header.IsMyFiEnabled
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_PO_HISTORY_GR'
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Purchase Order History for GR'
+@VDM.viewType: #COMPOSITE
+
+define view ZI_GR_PurchaseOrderHistory
+  as select from ekbe
+    inner join ekpo on ekbe.ebeln = ekpo.ebeln 
+                   and ekbe.ebelp = ekpo.ebelp  
+{
+  key ekbe.ebeln           as PurchaseOrder,
+  key ekbe.ebelp           as PurchaseOrderItem,
+  key ekbe.zekkn           as AccountAssignmentNumber,
+  key ekbe.vgabe           as TransactionType,
+  key ekbe.gjahr           as FiscalYear,
+  key ekbe.belnr           as DocumentNumber,
+  key ekbe.buzei           as DocumentItem,
+      
+      ekbe.bewtp           as POHistoryCategory,
+      ekbe.bwart           as MovementType,
+      ekbe.budat           as PostingDate,
+      
+      @Semantics.quantity.unitOfMeasure: 'Unit'
+      ekbe.menge           as Quantity,
+      ekpo.meins           as Unit,
+      
+      @Semantics.quantity.unitOfMeasure: 'OrderUnit'  
+      ekbe.bpmng           as QuantityInOrderUnit,
+      ekpo.bprme           as OrderUnit,
+      
+      @Semantics.amount.currencyCode: 'Currency'
+      ekbe.dmbtr           as AmountInLocalCurrency,
+      ekbe.waers           as Currency,
+      
+      @Semantics.amount.currencyCode: 'Currency'
+      ekbe.wrbtr           as AmountInDocumentCurrency,
+      
+      ekbe.shkzg           as DebitCreditIndicator,
+      ekbe.xblnr           as ReferenceDocument,
+      
+      -- Material document reference
+      ekbe.lfgja           as MaterialDocumentYear,
+      ekbe.lfbnr           as MaterialDocument,
+      ekbe.lfpos           as MaterialDocumentItem,
+      
+      -- Aggregated quantities by type
+      case ekbe.vgabe
+        when '1' then ekpo.menge  -- Goods Receipt
+        else 0
+      end as GoodsReceiptQuantity,
+      
+      case ekbe.vgabe
+        when '2' then ekpo.menge  -- Invoice Receipt
+        else 0
+      end as InvoiceQuantity
+}
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_PO_GR_QTY'
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'PO Goods Receipt Quantities'
+define view ZI_ZLFC_GR_POReceivedQty
+  as select from ekbe
+    inner join ekpo on ekbe.ebeln = ekpo.ebeln 
+                   and ekbe.ebelp = ekpo.ebelp
+{
+  key ekbe.ebeln as PurchaseOrder,
+  key ekbe.ebelp as PurchaseOrderItem,
+  @Semantics.quantity.unitOfMeasure: 'OrderUnit'
+  sum(ekbe.menge) as DeliveredQuantity,
+  ekpo.meins as OrderUnit  -- Using unit from EKPO for consistency
+}
+where ekbe.vgabe = '1' -- Goods Receipt
+group by ekbe.ebeln, ekbe.ebelp, ekpo.meins
+
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_PO_HEADER_GR'
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Purchase Order Header for GR'
+@VDM.viewType: #COMPOSITE
+
+define view ZI_ZLFC_GR_PurchaseOrderHeader
+  as select from ekko
+    left outer join lfa1 on lfa1.lifnr = ekko.lifnr
+    
+    -- Define association to items
+    association [0..*] to ekpo as _Items
+        on _Items.ebeln = ekko.ebeln
+
+    -- Define association to vendor
+    association [0..1] to lfa1 as _Vendor
+        on _Vendor.lifnr = ekko.lifnr         
+{
+  key ekko.ebeln      as PurchaseOrder,
+      
+      ekko.bukrs      as CompanyCode,
+      ekko.bsart      as DocumentType,
+      ekko.bstyp      as DocumentCategory,
+      ekko.lifnr      as Vendor,
+      lfa1.name1      as VendorName,
+      ekko.waers      as Currency,
+      ekko.bedat      as DocumentDate,
+      ekko.aedat      as CreatedOn,
+      ekko.ernam      as CreatedBy,
+      
+      -- Status flags
+      ekko.memory     as OnHold,
+      ekko.frgrl      as ReleaseNotComplete,
+      ekko.frgke      as ReleaseIndicator,
+      ekko.frgzu      as ReleaseStatus,
+      
+      -- Derived fields
+      case when ekko.memory = ''
+           then 'X'
+           else ''
+      end as IsComplete,
+      
+      case when ekko.frgrl = ''
+           then 'X'
+           else ''
+      end as IsApproved,
+      
+      case when ekko.bsart = 'NB'
+           then 'X'
+           else ''
+      end as IsStandardPO,
+      
+      -- All standard POs are MyFi enabled
+      case when ekko.bsart = 'NB'
+           then 'X'
+           else ''
+      end as IsMyFiEnabled,
+      
+      -- Associations
+      _Items,
+      _Vendor
+}
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_PO_ITEMS_GR'
+@AbapCatalog.dataMaintenance: #RESTRICTED
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Purchase Order Items for GR'
+@VDM.viewType: #COMPOSITE
+
+define view ZI_ZLFC_GR_PurchaseOrderItems
+  as select from ekpo
+    inner join ekko on ekko.ebeln = ekpo.ebeln
+    left outer join ZI_ZLFC_GR_POReceivedQty as gr 
+      on  gr.PurchaseOrder = ekpo.ebeln
+      and gr.PurchaseOrderItem = ekpo.ebelp
+{
+  key ekpo.ebeln      as PurchaseOrder,
+  key ekpo.ebelp      as PurchaseOrderItem,
+      
+      ekpo.txz01      as ItemDescription,
+      ekpo.matnr      as Material,
+      ekpo.werks      as Plant,
+      ekpo.lgort      as StorageLocation,
+      ekpo.matkl      as MaterialGroup,
+      
+      @Semantics.quantity.unitOfMeasure: 'OrderUnit'
+      ekpo.menge      as OrderQuantity,
+      ekpo.meins      as OrderUnit,
+      
+      @Semantics.amount.currencyCode: 'Currency'
+      ekpo.netpr      as NetPrice,
+      ekpo.peinh      as PriceUnit,
+      @Semantics.amount.currencyCode: 'Currency'
+      ekpo.netwr      as NetValue,
+      @Semantics.amount.currencyCode: 'Currency'
+      ekpo.effwr      as EffectiveValue,
+      ekko.waers      as Currency,  -- Currency from EKKO header
+      
+      ekpo.mwskz      as TaxCode,
+      ekpo.webre      as GRBasedIV,
+      ekpo.knttp      as AccountAssignmentCategory,
+      ekpo.loekz      as DeletionIndicator,
+      ekpo.elikz      as DeliveryCompleted,
+      ekpo.erekz      as FinalInvoice,
+      ekpo.repos      as InvoiceReceipt,
+      
+      -- GR quantities
+      @Semantics.quantity.unitOfMeasure: 'OrderUnit'
+      coalesce(gr.DeliveredQuantity, cast(0 as abap.dec(13,3))) as DeliveredQuantity,
+      
+      @Semantics.quantity.unitOfMeasure: 'OrderUnit'
+      ekpo.menge - coalesce(gr.DeliveredQuantity, cast(0 as abap.dec(13,3))) as OpenQuantity,
+      
+      -- Flags for GR processing
+      case when ekpo.repos = ''  -- GR indicator set
+           and ekpo.elikz = ''  -- Not delivery completed
+           and ekpo.loekz = ''  -- Not deleted
+           and ekpo.erekz = ''  -- Not final invoiced
+           and ekpo.knttp != 'X' -- Not unknown account assignment
+           then 'X'
+           else ''
+      end as AvailableForGR,
+      
+      case when ekpo.knttp = 'A'
+           then 'X'
+           else ''
+      end as IsAssetItem
+}
+
+
+
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@Metadata.ignorePropagatedAnnotations: true
+@AbapCatalog.sqlViewName: 'ZV_TAX_CONFIG_GR'
+@EndUserText.label: 'Tax Configuration for GR'
+@VDM.viewType: #BASIC
+
+define view ZI_ZLFC_TaxConfiguration
+  as select from t007a
+    inner join a003 on a003.mwskz = t007a.mwskz
+    inner join konp on konp.knumh = a003.knumh 
+                   and konp.kopos = '01'
+{
+  key t007a.mwskz     as TaxCode,
+  key t007a.kalsm     as TaxProcedure,
+      
+      konp.kbetr      as TaxAmount,
+      cast (konp.kbetr as abap.fltp) / cast (1000 as abap.fltp) as TaxRate,
+      //division( konp.kbetr, 1000, 3 ) as TaxRate,
+      konp.konwa      as ConditionCurrency,
+      
+      a003.kschl      as ConditionType,
+      a003.aland      as Country
+}
+where t007a.kalsm = 'TAXAU'
+  and t007a.mwskz like 'P%'
+  //and ( a003.kschl = 'ZZ02' or a003.kschl = 'ZZ04' )
+  and a003.aland = 'AU'
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_USER_EMP_GR'
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'User and Employee Data'
+@VDM.viewType: #COMPOSITE
+
+define view ZI_ZLFC_UserEmployeeData
+  as select from usr21
+    left outer join adrp on adrp.persnumber = usr21.persnumber
+    left outer join pa0105 on pa0105.usrid = usr21.bname
+                           and pa0105.subty = '0001'
+                           and pa0105.begda <= $session.system_date
+                           and pa0105.endda >= $session.system_date
+    left outer join pa0001 on pa0001.pernr = pa0105.pernr
+                           and pa0001.begda <= $session.system_date
+                           and pa0001.endda >= $session.system_date
+    left outer join pa0002 on pa0002.pernr = pa0105.pernr
+                           and pa0002.begda <= $session.system_date
+                           and pa0002.endda >= $session.system_date
+{
+  key usr21.bname     as UserName,
+      
+      -- User master data
+      adrp.name_text  as FullNameFromUser,
+      adrp.name_first as FirstName,
+      adrp.name_last  as LastName,
+      
+      -- Employee data
+      pa0105.pernr    as EmployeeNumber,
+      pa0001.bukrs    as CompanyCode,
+      pa0001.orgeh    as OrganizationalUnit,
+      pa0001.kostl    as CostCenter,
+      
+      -- Employee name details
+      pa0002.nachn    as EmployeeLastName,
+      pa0002.vorna    as EmployeeFirstName,
+      pa0002.titel    as Title,
+      
+      -- Combined name
+      concat_with_space(
+        concat_with_space(pa0002.titel, pa0002.vorna, 1),
+        pa0002.nachn, 1
+      ) as FullNameFromHR,
+      
+      -- Use HR name if available, otherwise user master
+      case when pa0002.pernr is not null
+           then concat_with_space(
+                  concat_with_space(pa0002.titel, pa0002.vorna, 1),
+                  pa0002.nachn, 1
+                )
+           else adrp.name_text
+      end as DisplayName
+}

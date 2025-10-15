@@ -1,0 +1,1409 @@
+This is an SAP UI5 application for our S/4HANA onprem system (ERP).
+It is based on a similar app on previous ECC6 system (ROMAN).
+Currently a prototype (local object) that is about to be put on real objects in dev so want to tidy it up.
+
+UI5 Application:
+ZLFC_GR
+
+Gateway Service:
+ZLFC_GR_SRV
+
+Structures:
+ZSLCL_GR_ASSET
+ZSLCL_GR_HDR
+ZSLCL_GR_ITM
+ZSLCL_GR_MATDOC
+ZSLCL_GR_POASSET
+ZSLCL_GR_POHDR
+ZSLCL_GR_POITM
+ZSLCL_GR_POMVT
+ZSLCL_USER
+
+
+Entity to ABAP Stucture Mapping (Entity Name, ABAP Structure):
+Asset	ZSLCL_GR_ASSET
+GoodsReceipt	ZSLCL_GR_HDR
+GoodsReceiptItem	ZSLCL_GR_ITM
+GoodsReciptLookup	
+MaterialDocument	ZSLCL_GR_MATDOC
+PurchaseOrder	ZSLCL_GR_POHDR
+PurchaseOrderAsset	ZSLCL_GR_POASSET
+PurchaseOrderItem	ZSLCL_GR_POITM
+PurchaseOrderLookup	
+PurchaseOrderMovement	ZSLCL_GR_POMVT
+UserDetail	ZSLCL_USER
+ZlfcShGr	
+
+Database Views:
+ZLFC_SH_PO0
+ZLFC_SH_PO1
+
+Search Helps:
+ZLFC_SH_GR
+ZLFC_SH_PO0
+ZLFC_SH_PO1
+
+
+CDS Views (sqlViewName and corresponding data defintion in brackets)
+ZI_GR_GRLOOKUP (ZC_GrReceiptSearch)
+ZVGRPOHEADER (ZI_GR_POHeader)
+ZVGRPOHEADERASC (ZI_GR_POHEADER_ASSOC)
+ZVGRPOHDRITMVEN (ZI_GR_POHEADER_ITM_VEN)
+ZV_ASSET_FLDCTL (ZI_GR_AssetFieldControl)
+ZV_ASSET_MASTER (ZI_ZLFC_GR_AssetMasterData)
+ZV_GR_DOCUMENTS (ZI_GR_GoodsReceiptDocs)
+ZV_PO_ASSETS_GR (ZI_GR_POAssetAssignments)
+ZV_GR_PO_MAIN (ZI_ZLFC_GR_POComplete)
+ZV_PO_HISTORY_GR (ZI_GR_PurchaseOrderHistory)
+ZV_PO_GR_QTY (ZI_ZLFC_GR_POReceivedQty)
+ZV_PO_HEADER_GR (ZI_ZLFC_GR_PurchaseOrderHeader)
+ZV_PO_ITEMS_GR (ZI_ZLFC_GR_PurchaseOrderItems)
+ZV_TAX_CONFIG_GR (ZI_ZLFC_TaxConfiguration)
+ZV_USER_EMP_GR (ZI_ZLFC_UserEmployeeData)
+
+
+----
+Database View: ZLFC_SH_PO0
+
+Tables:
+EKKO
+EKKN
+LFA1
+
+
+Join Conditions:
+EKKO	MANDT	=	EKKN	MANDT
+EKKO	EBELN	=	EKKN	EBELN
+EKKO	MANDT	=	LFA1	MANDT
+EKKO	LIFNR	=	LFA1	LIFNR
+
+
+View Fields (View field, Table, Field, Key)
+MANDT	EKKO	MANDT	(key)
+PO_NUMBER	EKKO	EBELN	(key)
+PO_ITEM	EKKN	EBELP	(key)
+SERIAL_NO	EKKN	ZEKKN	(key)
+CREAT_DATE	EKKO	AEDAT
+VENDOR	EKKO	LIFNR
+OA_NUMBER	EKKO	KONNR
+COSTCENTER	EKKN	KOSTL
+WBS_ELEMENT	EKKN	PS_PSP_PNR
+VENDOR_NAME	LFA1	NAME1
+VENDOR_NAME_M_C	LFA1	MCOD1
+ABN	LFA1	STCEG
+
+
+
+
+Database View: ZLFC_SH_PO1
+
+Tables:
+EKKO
+EKKN
+LFA1
+PRPS
+
+
+Join Conditions:
+EKKO	MANDT	=	EKKN	MANDT
+EKKO	EBELN	=	EKKN	EBELN
+EKKO	MANDT	=	LFA1	MANDT
+EKKO	LIFNR	=	LFA1	LIFNR
+EKKN	MANDT	=	PRPS	MANDT
+EKKN	PS_PSP_PNR	=	PRPS	PSPNR
+
+
+View Fields (View field, Table, Field, Key)
+MANDT	EKKO	MANDT	(key)
+PO_NUMBER	EKKO	EBELN	(key)
+PO_ITEM	EKKN	EBELP	(key)
+SERIAL_NO	EKKN	ZEKKN	(key)
+CREAT_DATE	EKKO	AEDAT
+VENDOR	EKKO	LIFNR
+OA_NUMBER	EKKO	KONNR
+COSTCENTER	EKKN	KOSTL
+VENDOR_NAME	LFA1	NAME1
+VENDOR_NAME_M_C	LFA1	MCOD1
+ABN	LFA1	STCEG
+WBS_ELEMENT	PRPS	POSID
+
+
+
+
+
+
+
+Elementary Search Help: ZLFC_SH_GR
+
+Selection Method: ZI_GR_GRLOOKUP
+
+Parameter (Paramter, LPos, SPos, Data Element):
+MAT_DOC	1	1	MBLNR
+DOC_DATE	2	2	BLDAT
+USERNAME	3	0	USNAM
+REF_DOC_NO	4	4	XBLNR1
+HEADER_TXT	5	5	BKTXT
+VENDOR	6	6	ELIFN
+DEB_CRE_IND	0	7	SHKZG
+ENTRY_QNT	0	8	ERFMG
+PO_NUMBER	9	9	BSTNR
+PO_ITEM	10	10	EBELP
+VENDOR_NAME	0	11	NAME1_GP
+VENDOR_NAME_M_C	12	0	MCDK1
+
+
+
+Elementary Search Help: ZLFC_SH_PO0
+
+Selection Method: ZLFC_SH_PO0
+
+Parameter (Paramter, LPos, SPos, Data Element):
+PO_NUMBER	1	1	EBELN
+CREAT_DATE	2	2	ERDAT
+VENDOR	3	3	ELIFN
+OA_NUMBER	4	4	KONNR
+COSTCENTER	5	0	KOSTL
+WBS_ELEMENT	6	0	PS_PSP_PNR
+VENDOR_NAME	0	7	NAME1_GP
+VENDOR_NAME_M_C	8	0	MCDK1
+ABN	9	0	STCEG
+
+
+
+
+Elementary Search Help: ZLFC_SH_PO1
+
+Selection Method: ZLFC_SH_PO1
+
+Parameter (Paramter, LPos, SPos, Data Element):
+PO_NUMBER	1	1	EBELN
+CREAT_DATE	2	2	ERDAT
+VENDOR	3	3	ELIFN
+OA_NUMBER	4	4	KONNR
+COSTCENTER	0	5	KOSTL
+WBS_ELEMENT	0	6	PS_POSID
+VENDOR_NAME	7	0	NAME1_GP
+VENDOR_NAME_M_C	0	8	MCDK1
+ABN	0	9	STCEG
+
+
+
+
+
+
+
+
+
+
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+ <edmx:DataServices m:DataServiceVersion="2.0">
+  <Schema Namespace="ZLFC_GR_SRV" xml:lang="en" sap:schema-version="1" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+   <EntityType Name="PurchaseOrder" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="PoNumber"/>
+    </Key>
+    <Property Name="PoNumber" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:label="Purchasing Doc." sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Currency" Type="Edm.String" MaxLength="5" sap:unicode="false" sap:label="Currency" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" sap:semantics="currency-code"/>
+    <Property Name="TotalValue" Type="Edm.Decimal" Precision="23" Scale="4" sap:unicode="false" sap:label="Valuation Price" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Vendor" Type="Edm.String" MaxLength="10" sap:unicode="false" sap:label="Supplier" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VendorName" Type="Edm.String" MaxLength="30" sap:unicode="false" sap:label="Name 1" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CompCode" Type="Edm.String" MaxLength="4" sap:unicode="false" sap:label="Company Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Complete" Type="Edm.Boolean" sap:unicode="false" sap:label="Boolean Variable (X=True, Space=False)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Approved" Type="Edm.Boolean" sap:unicode="false" sap:label="Boolean Variable (X=True, Space=False)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Excluded" Type="Edm.Boolean" sap:unicode="false" sap:label="Boolean Variable (X=True, Space=False)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="IsMyFi" Type="Edm.Boolean" sap:unicode="false" sap:label="Boolean Variable (X=True, Space=False)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="SubmitFlag" Type="Edm.Boolean" sap:unicode="false" sap:label="Boolean Variable (X=True, Space=False)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="GrValue" Type="Edm.Decimal" Precision="23" Scale="4" sap:unicode="false" sap:label="Amount" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Vimdocid" Type="Edm.String" MaxLength="12" sap:unicode="false" sap:label="Document Id" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Invnumber" Type="Edm.String" MaxLength="16" sap:unicode="false" sap:label="Reference" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VimInvoiceAmount" Type="Edm.Decimal" Precision="23" Scale="4" sap:unicode="false" sap:label="Amount" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VimBalance" Type="Edm.Decimal" Precision="23" Scale="4" sap:unicode="false" sap:label="Amount" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VimCurrency" Type="Edm.String" MaxLength="5" sap:unicode="false" sap:label="Currency" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" sap:semantics="currency-code"/>
+    <Property Name="HasAsset" Type="Edm.Boolean" sap:unicode="false" sap:label="Boolean Variable (X=True, Space=False)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <NavigationProperty Name="Assets" Relationship="ZLFC_GR_SRV.PurchaseOrder_PurchaseOrderAssets" FromRole="FromRole_PurchaseOrder_PurchaseOrderAssets" ToRole="ToRole_PurchaseOrder_PurchaseOrderAssets"/>
+    <NavigationProperty Name="MaterialDocuments" Relationship="ZLFC_GR_SRV.PurchaseOrder_MaterialDocuments" FromRole="FromRole_PurchaseOrder_MaterialDocuments" ToRole="ToRole_PurchaseOrder_MaterialDocuments"/>
+    <NavigationProperty Name="Movements" Relationship="ZLFC_GR_SRV.PurchaseOrder_PurchaseOrderMovements" FromRole="FromRole_PurchaseOrder_PurchaseOrderMovements" ToRole="ToRole_PurchaseOrder_PurchaseOrderMovements"/>
+    <NavigationProperty Name="Items" Relationship="ZLFC_GR_SRV.PurchaseOrder_PurchaseOrderItems" FromRole="FromRole_PurchaseOrder_PurchaseOrderItems" ToRole="ToRole_PurchaseOrder_PurchaseOrderItems"/>
+   </EntityType>
+   <EntityType Name="PurchaseOrderItem" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="PoItem"/>
+    </Key>
+    <Property Name="PoItem" Type="Edm.String" Nullable="false" MaxLength="5" sap:unicode="false" sap:label="Item" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="TaxRate" Type="Edm.Decimal" Precision="12" Scale="3" sap:unicode="false" sap:label="Amount" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="ShortText" Type="Edm.String" MaxLength="40" sap:unicode="false" sap:label="Short Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Quantity" Type="Edm.Decimal" Precision="13" Scale="3" sap:unicode="false" sap:unit="PoUnit" sap:label="PO Quantity" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PoUnit" Type="Edm.String" MaxLength="3" sap:unicode="false" sap:label="Order Unit" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" sap:semantics="unit-of-measure"/>
+    <Property Name="NetPrice" Type="Edm.Decimal" Precision="28" Scale="9" sap:unicode="false" sap:label="Currency amount" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="TaxCode" Type="Edm.String" MaxLength="2" sap:unicode="false" sap:label="Tax Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="EffectiveValue" Type="Edm.Decimal" Precision="14" Scale="3" sap:unicode="false" sap:label="Effective value" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="QuantityRemaining" Type="Edm.Decimal" Precision="13" Scale="3" sap:unicode="false" sap:unit="PoUnit" sap:label="PO Quantity" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Acctasscat" Type="Edm.String" MaxLength="1" sap:unicode="false" sap:label="Acct Assgmt Cat" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="IsAsset" Type="Edm.Boolean" sap:unicode="false" sap:label="Boolean Variable (X=True, Space=False)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="PurchaseOrderMovement" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="MovtId"/>
+    </Key>
+    <Property Name="MovtId" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:label="Movement ID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PoItem" Type="Edm.String" MaxLength="5" sap:unicode="false" sap:label="Item" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="RefDocNo" Type="Edm.String" MaxLength="16" sap:unicode="false" sap:label="Reference" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="HeaderTxt" Type="Edm.String" MaxLength="25" sap:unicode="false" sap:label="Doc.Header Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="EntryQnt" Type="Edm.Decimal" Precision="13" Scale="3" sap:unicode="false" sap:unit="EntryUom" sap:label="Quantity in UnE" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="EntryUom" Type="Edm.String" MaxLength="3" sap:unicode="false" sap:label="Unit of Entry" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" sap:semantics="unit-of-measure"/>
+    <Property Name="DocDate" Type="Edm.DateTime" Precision="7" sap:unicode="false" sap:label="Document Date" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="IsAsset" Type="Edm.Boolean" sap:unicode="false" sap:label="Boolean Variable (X=True, Space=False)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PoItemVs" Type="Edm.String" MaxLength="20" sap:unicode="false" sap:label="Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="EntryQntVs" Type="Edm.String" MaxLength="20" sap:unicode="false" sap:label="Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="DocDateVs" Type="Edm.String" MaxLength="20" sap:unicode="false" sap:label="Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="LineStatus" Type="Edm.String" MaxLength="20" sap:unicode="false" sap:label="Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="MaterialDocument" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="MatDoc"/>
+     <PropertyRef Name="DocYear"/>
+    </Key>
+    <Property Name="MatDoc" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Material Doc." sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="DocYear" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Mat. Doc. Year" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="GoodsReceipt" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="MatDoc"/>
+     <PropertyRef Name="DocYear"/>
+    </Key>
+    <Property Name="MatDoc" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Material Doc." sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="DocYear" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Mat. Doc. Year" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PoNumber" Type="Edm.String" MaxLength="10" sap:unicode="false" sap:label="Purchasing Doc." sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PoIsMyFi" Type="Edm.Boolean" sap:unicode="false" sap:label="Is MyFi" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Currency" Type="Edm.String" MaxLength="5" sap:unicode="false" sap:label="Currency" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" sap:semantics="currency-code"/>
+    <Property Name="TotalValue" Type="Edm.Decimal" Precision="17" Scale="3" sap:unicode="false" sap:label="Valuation Price" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Vendor" Type="Edm.String" MaxLength="10" sap:unicode="false" sap:label="Supplier" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VendorName" Type="Edm.String" MaxLength="30" sap:unicode="false" sap:label="Name 1" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Username" Type="Edm.String" MaxLength="12" sap:unicode="false" sap:label="User Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="UsernameFull" Type="Edm.String" sap:unicode="false" sap:label="String" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <NavigationProperty Name="Items" Relationship="ZLFC_GR_SRV.GoodsReceipt_GoodsReceiptItems" FromRole="FromRole_GoodsReceipt_GoodsReceiptItems" ToRole="ToRole_GoodsReceipt_GoodsReceiptItems"/>
+    <NavigationProperty Name="MaterialDocuments" Relationship="ZLFC_GR_SRV.GoodsReceipt_MaterialDocuments" FromRole="FromRole_GoodsReceipt_MaterialDocuments" ToRole="ToRole_GoodsReceipt_MaterialDocuments"/>
+   </EntityType>
+   <EntityType Name="GoodsReceiptItem" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="MatdocItm"/>
+    </Key>
+    <Property Name="MatdocItm" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Mat. Doc.Item" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PoItem" Type="Edm.String" MaxLength="5" sap:unicode="false" sap:label="Item" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="ShortText" Type="Edm.String" MaxLength="40" sap:unicode="false" sap:label="Short Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="RefDocNo" Type="Edm.String" MaxLength="16" sap:unicode="false" sap:label="Reference" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="HeaderTxt" Type="Edm.String" MaxLength="25" sap:unicode="false" sap:label="Doc.Header Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="EntryQnt" Type="Edm.Decimal" Precision="13" Scale="3" sap:unicode="false" sap:unit="EntryUom" sap:label="Quantity in UnE" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="EntryUom" Type="Edm.String" MaxLength="3" sap:unicode="false" sap:label="Unit of Entry" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" sap:semantics="unit-of-measure"/>
+    <Property Name="NetPrice" Type="Edm.Decimal" Precision="28" Scale="9" sap:unicode="false" sap:label="Currency amount" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="TaxCode" Type="Edm.String" MaxLength="2" sap:unicode="false" sap:label="Tax Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="DocDate" Type="Edm.DateTime" Precision="7" sap:unicode="false" sap:label="Document Date" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Selected" Type="Edm.Boolean" sap:unicode="false" sap:label="Selected Flag" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Reversed" Type="Edm.Boolean" sap:unicode="false" sap:label="Boolean Variable (X=True, Space=False)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="NoMoreGr" Type="Edm.Boolean" sap:unicode="false" sap:label="Deliv. Compl." sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="LineStatus" Type="Edm.String" MaxLength="20" sap:unicode="false" sap:label="Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="UserDetail" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="UserId"/>
+    </Key>
+    <Property Name="UserId" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:label="User Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="FullName" Type="Edm.String" MaxLength="80" sap:unicode="false" sap:label="Full Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="FullNameHr" Type="Edm.String" sap:unicode="false" sap:label="Full Name from HR Record" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="HelpUrl" Type="Edm.String" MaxLength="255" sap:unicode="false" sap:label="URL" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="PurchaseOrderAsset" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="PoItem"/>
+     <PropertyRef Name="AssetNo"/>
+     <PropertyRef Name="SubNumber"/>
+    </Key>
+    <Property Name="PoItem" Type="Edm.String" Nullable="false" MaxLength="5" sap:unicode="false" sap:label="Item" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="AssetNo" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:label="Asset" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="SubNumber" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Sub-number" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="Asset" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="CompCode"/>
+     <PropertyRef Name="AssetNo"/>
+     <PropertyRef Name="SubNumber"/>
+    </Key>
+    <Property Name="CompCode" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Company Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="AssetNo" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:label="Asset" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="SubNumber" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Sub-number" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Costcenter" Type="Edm.String" MaxLength="10" sap:unicode="false" sap:label="Cost Center" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Location" Type="Edm.String" MaxLength="10" sap:unicode="false" sap:label="Location" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Assetclass" Type="Edm.String" MaxLength="8" sap:unicode="false" sap:label="Asset class" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="MainDescript" Type="Edm.String" MaxLength="50" sap:unicode="false" sap:label="Asset main no. text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Note" Type="Edm.String" MaxLength="15" sap:unicode="false" sap:label="Inventory note" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PlateNo" Type="Edm.String" MaxLength="15" sap:unicode="false" sap:label="License plate number" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="InventNo" Type="Edm.String" MaxLength="25" sap:unicode="false" sap:label="Inventory no." sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="SerialNo" Type="Edm.String" MaxLength="18" sap:unicode="false" sap:label="Serial number" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Room" Type="Edm.String" MaxLength="8" sap:unicode="false" sap:label="Room" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="MainDescriptOff" Type="Edm.Boolean" sap:unicode="false" sap:label="Hide Field" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="NoteOff" Type="Edm.Boolean" sap:unicode="false" sap:label="Hide Field" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PlateNoOff" Type="Edm.Boolean" sap:unicode="false" sap:label="Hide Field" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="InventNoOff" Type="Edm.Boolean" sap:unicode="false" sap:label="Hide Field" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="SerialNoOff" Type="Edm.Boolean" sap:unicode="false" sap:label="Hide Field" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="RoomOff" Type="Edm.Boolean" sap:unicode="false" sap:label="Hide Field" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="RoomLocked" Type="Edm.Boolean" sap:unicode="false" sap:label="Boolean Variable (X=True, Space=False)" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="PurchaseOrderLookup" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="PoNumber"/>
+     <PropertyRef Name="CreatDate"/>
+     <PropertyRef Name="Vendor"/>
+     <PropertyRef Name="OaNumber"/>
+     <PropertyRef Name="Abn"/>
+    </Key>
+    <Property Name="PoNumber" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Purchasing Doc." sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CreatDate" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Created on" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Vendor" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Supplier" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="OaNumber" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Agreement" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Abn" Type="Edm.String" Nullable="false" MaxLength="20" sap:unicode="false" sap:label="VAT Reg. No." sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VendorName" Type="Edm.String" Nullable="false" MaxLength="35" sap:unicode="false" sap:label="Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VendorNameMC" Type="Edm.String" Nullable="false" MaxLength="25" sap:unicode="false" sap:label="Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Costcenter" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Cost Center" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="WbsElement" Type="Edm.String" Nullable="false" MaxLength="24" sap:unicode="false" sap:label="WBS Element" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="GoodsReciptLookup" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="MatDoc"/>
+     <PropertyRef Name="DocDate"/>
+     <PropertyRef Name="Username"/>
+     <PropertyRef Name="RefDocNo"/>
+     <PropertyRef Name="HeaderTxt"/>
+     <PropertyRef Name="Vendor"/>
+     <PropertyRef Name="PoNumber"/>
+     <PropertyRef Name="PoItem"/>
+    </Key>
+    <Property Name="DebCreInd" Type="Edm.String" Nullable="false" MaxLength="1" sap:unicode="false" sap:label="Debit/Credit" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="EntryQnt" Type="Edm.Decimal" Nullable="false" Precision="13" Scale="3" sap:unicode="false" sap:label="Quantity in UnE" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VendorName" Type="Edm.String" Nullable="false" MaxLength="35" sap:unicode="false" sap:label="Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="MatDoc" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Material Doc." sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="DocDate" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Document Date" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Username" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:label="User Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="RefDocNo" Type="Edm.String" Nullable="false" MaxLength="16" sap:unicode="false" sap:label="Reference" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="HeaderTxt" Type="Edm.String" Nullable="false" MaxLength="25" sap:unicode="false" sap:label="Doc.Header Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Vendor" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Supplier" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PoNumber" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Purchase order" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PoItem" Type="Edm.String" Nullable="false" MaxLength="5" sap:unicode="false" sap:label="Item" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VendorNameMC" Type="Edm.String" Nullable="false" MaxLength="25" sap:unicode="false" sap:label="Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="ZlfcShGr" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="MatDoc"/>
+     <PropertyRef Name="DocDate"/>
+     <PropertyRef Name="Username"/>
+     <PropertyRef Name="RefDocNo"/>
+     <PropertyRef Name="HeaderTxt"/>
+     <PropertyRef Name="Vendor"/>
+     <PropertyRef Name="PoNumber"/>
+     <PropertyRef Name="PoItem"/>
+    </Key>
+    <Property Name="DebCreInd" Type="Edm.String" Nullable="false" MaxLength="1" sap:unicode="false" sap:label="Debit/Credit" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="EntryQnt" Type="Edm.Decimal" Nullable="false" Precision="13" Scale="3" sap:unicode="false" sap:label="Quantity in UnE" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VendorName" Type="Edm.String" Nullable="false" MaxLength="35" sap:unicode="false" sap:label="Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="MatDoc" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Material Doc." sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="DocDate" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:label="Document Date" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Username" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:label="User Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="RefDocNo" Type="Edm.String" Nullable="false" MaxLength="16" sap:unicode="false" sap:label="Reference" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="HeaderTxt" Type="Edm.String" Nullable="false" MaxLength="25" sap:unicode="false" sap:label="Doc.Header Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Vendor" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Supplier" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PoNumber" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Purchase order" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="PoItem" Type="Edm.String" Nullable="false" MaxLength="5" sap:unicode="false" sap:label="Item" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="VendorNameMC" Type="Edm.String" Nullable="false" MaxLength="25" sap:unicode="false" sap:label="Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <Association Name="PurchaseOrder_MaterialDocuments" sap:content-version="1">
+    <End Type="ZLFC_GR_SRV.PurchaseOrder" Multiplicity="1" Role="FromRole_PurchaseOrder_MaterialDocuments"/>
+    <End Type="ZLFC_GR_SRV.MaterialDocument" Multiplicity="*" Role="ToRole_PurchaseOrder_MaterialDocuments"/>
+   </Association>
+   <Association Name="PurchaseOrder_PurchaseOrderAssets" sap:content-version="1">
+    <End Type="ZLFC_GR_SRV.PurchaseOrder" Multiplicity="1" Role="FromRole_PurchaseOrder_PurchaseOrderAssets"/>
+    <End Type="ZLFC_GR_SRV.PurchaseOrderAsset" Multiplicity="*" Role="ToRole_PurchaseOrder_PurchaseOrderAssets"/>
+   </Association>
+   <Association Name="PurchaseOrder_PurchaseOrderItems" sap:content-version="1">
+    <End Type="ZLFC_GR_SRV.PurchaseOrder" Multiplicity="1" Role="FromRole_PurchaseOrder_PurchaseOrderItems"/>
+    <End Type="ZLFC_GR_SRV.PurchaseOrderItem" Multiplicity="*" Role="ToRole_PurchaseOrder_PurchaseOrderItems"/>
+   </Association>
+   <Association Name="PurchaseOrder_PurchaseOrderMovements" sap:content-version="1">
+    <End Type="ZLFC_GR_SRV.PurchaseOrder" Multiplicity="1" Role="FromRole_PurchaseOrder_PurchaseOrderMovements"/>
+    <End Type="ZLFC_GR_SRV.PurchaseOrderMovement" Multiplicity="*" Role="ToRole_PurchaseOrder_PurchaseOrderMovements"/>
+   </Association>
+   <Association Name="GoodsReceipt_GoodsReceiptItems" sap:content-version="1">
+    <End Type="ZLFC_GR_SRV.GoodsReceipt" Multiplicity="1" Role="FromRole_GoodsReceipt_GoodsReceiptItems"/>
+    <End Type="ZLFC_GR_SRV.GoodsReceiptItem" Multiplicity="*" Role="ToRole_GoodsReceipt_GoodsReceiptItems"/>
+   </Association>
+   <Association Name="GoodsReceipt_MaterialDocuments" sap:content-version="1">
+    <End Type="ZLFC_GR_SRV.GoodsReceipt" Multiplicity="1" Role="FromRole_GoodsReceipt_MaterialDocuments"/>
+    <End Type="ZLFC_GR_SRV.MaterialDocument" Multiplicity="*" Role="ToRole_GoodsReceipt_MaterialDocuments"/>
+   </Association>
+   <EntityContainer Name="ZLFC_GR_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx">
+    <EntitySet Name="PurchaseOrders" EntityType="ZLFC_GR_SRV.PurchaseOrder" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="PurchaseOrderItems" EntityType="ZLFC_GR_SRV.PurchaseOrderItem" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="PurchaseOrderMovements" EntityType="ZLFC_GR_SRV.PurchaseOrderMovement" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="MaterialDocuments" EntityType="ZLFC_GR_SRV.MaterialDocument" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="GoodsReceipts" EntityType="ZLFC_GR_SRV.GoodsReceipt" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="GoodsReceiptItems" EntityType="ZLFC_GR_SRV.GoodsReceiptItem" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="UserDetails" EntityType="ZLFC_GR_SRV.UserDetail" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="PurchaseOrderAssets" EntityType="ZLFC_GR_SRV.PurchaseOrderAsset" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="Assets" EntityType="ZLFC_GR_SRV.Asset" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="PurchaseOrderLookups" EntityType="ZLFC_GR_SRV.PurchaseOrderLookup" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="GoodsReciptLookups" EntityType="ZLFC_GR_SRV.GoodsReciptLookup" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <EntitySet Name="ZlfcShGrs" EntityType="ZLFC_GR_SRV.ZlfcShGr" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+    <AssociationSet Name="PurchaseOrders_PurchaseOrderAssets" Association="ZLFC_GR_SRV.PurchaseOrder_PurchaseOrderAssets" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+     <End EntitySet="PurchaseOrders" Role="FromRole_PurchaseOrder_PurchaseOrderAssets"/>
+     <End EntitySet="PurchaseOrderAssets" Role="ToRole_PurchaseOrder_PurchaseOrderAssets"/>
+    </AssociationSet>
+    <AssociationSet Name="PurchaseOrder_MaterialDocuments_AssocSet" Association="ZLFC_GR_SRV.PurchaseOrder_MaterialDocuments" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+     <End EntitySet="PurchaseOrders" Role="FromRole_PurchaseOrder_MaterialDocuments"/>
+     <End EntitySet="MaterialDocuments" Role="ToRole_PurchaseOrder_MaterialDocuments"/>
+    </AssociationSet>
+    <AssociationSet Name="PurchaseOrders_PurchaseOrderMovements" Association="ZLFC_GR_SRV.PurchaseOrder_PurchaseOrderMovements" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+     <End EntitySet="PurchaseOrders" Role="FromRole_PurchaseOrder_PurchaseOrderMovements"/>
+     <End EntitySet="PurchaseOrderMovements" Role="ToRole_PurchaseOrder_PurchaseOrderMovements"/>
+    </AssociationSet>
+    <AssociationSet Name="PurchaseOrders_PurchaseOrderItems" Association="ZLFC_GR_SRV.PurchaseOrder_PurchaseOrderItems" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+     <End EntitySet="PurchaseOrders" Role="FromRole_PurchaseOrder_PurchaseOrderItems"/>
+     <End EntitySet="PurchaseOrderItems" Role="ToRole_PurchaseOrder_PurchaseOrderItems"/>
+    </AssociationSet>
+    <AssociationSet Name="GoodsReceipt_GoodsReceiptItems_AssocSet" Association="ZLFC_GR_SRV.GoodsReceipt_GoodsReceiptItems" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+     <End EntitySet="GoodsReceipts" Role="FromRole_GoodsReceipt_GoodsReceiptItems"/>
+     <End EntitySet="GoodsReceiptItems" Role="ToRole_GoodsReceipt_GoodsReceiptItems"/>
+    </AssociationSet>
+    <AssociationSet Name="GoodsReceipts_MaterialDocuments" Association="ZLFC_GR_SRV.GoodsReceipt_MaterialDocuments" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+     <End EntitySet="GoodsReceipts" Role="FromRole_GoodsReceipt_MaterialDocuments"/>
+     <End EntitySet="MaterialDocuments" Role="ToRole_GoodsReceipt_MaterialDocuments"/>
+    </AssociationSet>
+   </EntityContainer>
+   <atom:link rel="self" href="https://erps2daps01.dz2283.net.au:44300/sap/opu/odata/sap/ZLFC_gr_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+   <atom:link rel="latest-version" href="https://erps2daps01.dz2283.net.au:44300/sap/opu/odata/sap/ZLFC_gr_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+  </Schema>
+ </edmx:DataServices>
+</edmx:Edmx>
+
+
+
+
+
+
+
+
+Structure: ZSLCL_GR_HDR
+Components (Component, Typing Method, Component Type):  
+MAT_DOC	Types	MBLNR
+DOC_YEAR	Types	MJAHR
+PO_NUMBER	Types	EBELN
+PO_IS_MYFI	Types	SAP_BOOL
+CURRENCY	Types	WAERS
+TOTAL_VALUE	Types	BAPICURR_D
+VENDOR	Types	ELIFN
+VENDOR_NAME	Types	NAME1
+USERNAME	Types	USNAM
+USERNAME_FULL	Types	ZFSS_STRING
+
+
+Structure: ZSLCL_GR_ITM
+Components (Component, Typing Method, Component Type):  
+MATDOC_ITM	Types	MBLPO
+PO_ITEM	Types	EBELP
+SHORT_TEXT	Types	TXZ01
+REF_DOC_NO	Types	XBLNR
+HEADER_TXT	Types	BKTXT
+ENTRY_QNT	Types	ERFMG
+ENTRY_UOM	Types	ERFME
+NET_PRICE	Types	BAPICUREXT
+TAX_CODE	Types	MWSKZ
+DOC_DATE	Types	BLDAT
+SELECTED	Types	SAP_BOOL
+REVERSED	Types	SAP_BOOL
+NO_MORE_GR	Types	ELIKZ
+LINE_STATUS	Types	TEXT20
+
+
+Structure: ZSLCL_GR_MATDOC
+Components (Component, Typing Method, Component Type):  
+MAT_DOC	Types	MBLNR
+DOC_YEAR	Types	MJAHR
+
+
+Structure: ZSLCL_GR_POASSET
+Components (Component, Typing Method, Component Type):  
+PO_ITEM	Types	EBELP
+ASSET_NO	Types	ANLN1
+SUB_NUMBER	Types	ANLN2
+
+
+Structure: ZSLCL_GR_POHDR
+Components (Component, Typing Method, Component Type):  
+PO_NUMBER	Types	CHAR12
+CURRENCY	Types	WAERS
+TOTAL_VALUE	Types	VAL_FORCURR
+VENDOR	Types	ELIFN
+VENDOR_NAME	Types	NAME1
+COMP_CODE	Types	BUKRS
+COMPLETE	Types	SAP_BOOL
+APPROVED	Types	SAP_BOOL
+EXCLUDED	Types	SAP_BOOL
+IS_MY_FI	Types	SAP_BOOL
+SUBMIT_FLAG	Types	SAP_BOOL
+GR_VALUE	Types	VAL_FORCURR
+VIMDOCID	Types	/OPT/DOCID
+INVNUMBER	Types	XBLNR
+VIM_INVOICE_AMOUNT	Types	VAL_FORCURR
+VIM_BALANCE	Types	VAL_FORCURR
+VIM_CURRENCY	Types	WAERS
+HAS_ASSET	Types	SAP_BOOL
+
+
+Structure: ZSLCL_GR_POITM
+Components (Component, Typing Method, Component Type):  
+PO_ITEM	Types	EBELP
+SHORT_TEXT	Types	TXZ01
+QUANTITY	Types	BSTMG
+PO_UNIT	Types	BSTME
+NET_PRICE	Types	VAL_FORCURR
+TAX_CODE	Types	MWSKZ
+TAX_RATE	Types	KBETR_KOND
+TAX_RATE_UNIT	Types	KONWA
+EFFECTIVE_VALUE	Types	VAL_FORCURR
+QUANTITY_DELIVERED	Types	BSTMG
+QUANTITY_REMAINING	Types	BSTMG
+ACCTASSCAT	Types	KNTTP
+IS_ASSET	Types	SAP_BOOL
+
+
+Structure: ZSLCL_GR_POMVT
+Components (Component, Typing Method, Component Type):  
+MOVT_ID	Types	ZFSS_MOVT_ID
+PO_ITEM	Types	EBELP
+REF_DOC_NO	Types	XBLNR
+HEADER_TXT	Types	BKTXT
+ENTRY_QNT	Types	ERFMG
+ENTRY_UOM	Types	ERFME
+DOC_DATE	Types	BLDAT
+IS_ASSET	Types	SAP_BOOL
+PO_ITEM_VS	Types	TEXT20
+ENTRY_QNT_VS	Types	TEXT20
+DOC_DATE_VS	Types	TEXT20
+LINE_STATUS	Types	TEXT20
+
+
+Structure: ZSLCL_USER
+Components (Component, Typing Method, Component Type):  
+USER_ID	Types	USNAM
+FULL_NAME	Types	AD_NAMTEXT
+FULL_NAME_HR	Types	ZFSS_STRING
+HELP_URL	Types	TEXT255
+
+
+
+
+
+
+
+
+
+
+
+
+
+@AbapCatalog.sqlViewName: 'ZI_GR_GRLOOKUP'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Goods Receipt Search Help - PO Related'
+@Metadata.ignorePropagatedAnnotations: true
+@VDM.viewType: #BASIC
+
+define view ZC_GrReceiptSearch
+  as select from matdoc
+    left outer join lfa1 on matdoc.lifnr = lfa1.lifnr
+{
+  key matdoc.mblnr as mat_doc,
+  key matdoc.mjahr as doc_year,
+  key matdoc.zeile as matdoc_item,
+      
+      // Header fields
+      matdoc.bldat as doc_date,
+      matdoc.usnam as username,
+      matdoc.xblnr as ref_doc_no,
+      matdoc.bktxt as header_txt,
+      
+      // Item fields
+      matdoc.lifnr as vendor,
+      matdoc.shkzg as deb_cre_ind,
+      matdoc.erfmg as entry_qnt,
+      matdoc.erfme as entry_uom,
+      matdoc.ebeln as po_number,
+      matdoc.ebelp as po_item,
+      
+      // Vendor info
+      lfa1.name1 as vendor_name,
+      lfa1.mcod1 as vendor_name_m_c
+}
+where matdoc.record_type = 'MDOC'   
+  and matdoc.blart = 'WE'      // Only GR document type
+
+
+@AbapCatalog.sqlViewName: 'ZVGRPOHEADER'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Purchase Order Header for Goods Receipt'
+@Metadata.ignorePropagatedAnnotations: true
+@VDM.viewType: #BASIC
+@Analytics.dataCategory: #DIMENSION
+@ObjectModel.usageType.serviceQuality: #B
+@ObjectModel.usageType.sizeCategory: #L
+@ObjectModel.usageType.dataClass: #MASTER
+define view ZI_GR_POHeader
+    as select from ekko
+        inner join lfa1 on lfa1.lifnr = ekko.lifnr
+{
+    -- Key Fields
+    key ekko.ebeln as PurchaseOrder,
+
+    -- Header Data
+    ekko.bukrs as CompanyCode,
+    ekko.bsart as DocumentType,
+    ekko.bstyp as DocumentCategory,
+    
+    -- Vendor Information
+    ekko.lifnr as Vendor,
+    lfa1.name1 as VendorName,
+
+    -- Amounts and Currency
+    @Semantics.currencyCode: true
+    ekko.waers as Currency,
+
+    -- Dates
+    ekko.bedat as DocumentDate,
+    ekko.aedat as ChangedOn,
+    -- User
+    ekko.ernam as CreatedBy,
+    
+    -- Status Flags
+    ekko.memory as OnHold,
+    ekko.frgrl as ReleaseNotComplete,
+    ekko.frgke as ReleaseIndicator,
+    ekko.frgzu as ReleaseStatus,
+    ekko.procstat as ProcessingStatus,
+        
+    case
+        when ekko.memory = ''
+        then cast( 'X' as abap_boolean )
+        else cast( '' as abap_boolean )
+    end as IsComplete,
+    
+    case
+        when ekko.frgrl = ''
+        then cast( 'X' as abap_boolean )
+        else cast( '' as abap_boolean )
+    end as IsApproved,
+
+    case
+        when ekko.bsart = 'NB'
+        then cast( 'X' as abap_boolean )
+        else cast( '' as abap_boolean )
+    end as IsStandardPO
+}
+where ekko.loekz = '' -- Not deleted           
+
+
+
+
+@AbapCatalog.sqlViewName: 'ZVGRPOHEADERASC'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Purchase Order Header for Goods Receipt'
+@Metadata.ignorePropagatedAnnotations: true
+@VDM.viewType: #BASIC
+@Analytics.dataCategory: #DIMENSION
+@ObjectModel.usageType.serviceQuality: #B
+@ObjectModel.usageType.sizeCategory: #L
+@ObjectModel.usageType.dataClass: #MASTER
+define view ZI_GR_POHEADER_ASSOC
+    as select from ekko
+        inner join lfa1 on lfa1.lifnr = ekko.lifnr
+    
+    -- Define association to items
+    association [0..*] to ekpo as _Items
+        on _Items.ebeln = ekko.ebeln
+
+    -- Define association to vendor
+    association [0..1] to lfa1 as _Vendor
+        on _Vendor.lifnr = ekko.lifnr             
+{
+    -- Key Fields
+    key ekko.ebeln as PurchaseOrder,
+    
+    -- Expose associations
+    _Items,
+    _Vendor,     
+    
+    -- Header Data
+    ekko.bukrs as CompanyCode,
+    ekko.bsart as DocumentType,
+    ekko.bstyp as DocumentCategory,
+    
+    -- Vendor Information
+    ekko.lifnr as Vendor,
+    lfa1.name1 as VendorName,
+
+    -- Amounts and Currency
+    @Semantics.currencyCode: true
+    ekko.waers as Currency,
+
+    -- Dates
+    ekko.bedat as DocumentDate,
+    ekko.aedat as ChangedOn,
+    -- User
+    ekko.ernam as CreatedBy,
+    
+    -- Status Flags
+    ekko.memory as OnHold,
+    ekko.frgrl as ReleaseNotComplete,
+    ekko.frgke as ReleaseIndicator,
+    ekko.frgzu as ReleaseStatus,
+    ekko.procstat as ProcessingStatus,
+        
+    case
+        when ekko.memory = ''
+        then cast( 'X' as abap_boolean )
+        else cast( '' as abap_boolean )
+    end as IsComplete,
+    
+    case
+        when ekko.frgrl = ''
+        then cast( 'X' as abap_boolean )
+        else cast( '' as abap_boolean )
+    end as IsApproved,
+
+    case
+        when ekko.bsart = 'NB'
+        then cast( 'X' as abap_boolean )
+        else cast( '' as abap_boolean )
+    end as IsStandardPO
+}
+where ekko.loekz = '' -- Not deleted           
+
+
+
+
+@AbapCatalog.sqlViewName: 'ZVGRPOHDRITMVEN'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Purchase Order Header for Goods Receipt'
+@Metadata.ignorePropagatedAnnotations: true
+@VDM.viewType: #BASIC
+@Analytics.dataCategory: #DIMENSION
+@ObjectModel.usageType.serviceQuality: #B
+@ObjectModel.usageType.sizeCategory: #L
+@ObjectModel.usageType.dataClass: #MASTER
+define view ZI_GR_POHEADER_ITM_VEN
+    as select from ekko
+        inner join lfa1 on lfa1.lifnr = ekko.lifnr
+    
+    -- Define association to items
+    association [0..*] to ekpo as _Items
+        on _Items.ebeln = ekko.ebeln
+
+    -- Define association to vendor
+    association [0..1] to lfa1 as _Vendor
+        on _Vendor.lifnr = ekko.lifnr        
+{
+    -- Key Fields
+    key ekko.ebeln as PurchaseOrder,
+
+    -- Header Data
+    ekko.bukrs as CompanyCode,
+    ekko.bsart as DocumentType,
+    ekko.bstyp as DocumentCategory,
+    
+    -- Vendor Information
+    ekko.lifnr as Vendor,
+    lfa1.name1 as VendorName,
+
+    -- Amounts and Currency
+    @Semantics.currencyCode: true
+    ekko.waers as Currency,
+
+    -- Dates
+    ekko.bedat as DocumentDate,
+    ekko.aedat as ChangedOn,
+    -- User
+    ekko.ernam as CreatedBy,
+    
+    -- Status Flags
+    ekko.memory as OnHold,
+    ekko.frgrl as ReleaseNotComplete,
+    ekko.frgke as ReleaseIndicator,
+    ekko.frgzu as ReleaseStatus,
+    ekko.procstat as ProcessingStatus,
+        
+    case
+        when ekko.memory = ''
+        then cast( 'X' as abap_boolean )
+        else cast( '' as abap_boolean )
+    end as IsComplete,
+    
+    case
+        when ekko.frgrl = ''
+        then cast( 'X' as abap_boolean )
+        else cast( '' as abap_boolean )
+    end as IsApproved,
+
+    case
+        when ekko.bsart = 'NB'
+        then cast( 'X' as abap_boolean )
+        else cast( '' as abap_boolean )
+    end as IsStandardPO
+}
+where ekko.loekz = '' -- Not deleted           
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_ASSET_FLDCTL'
+@EndUserText.label: 'Asset Field Control Settings'
+@VDM.viewType: #BASIC
+
+define view ZI_GR_AssetFieldControl
+  as select from anka
+    inner join t082g on t082g.felei = anka.felei
+{
+  key anka.anlkl as AssetClass,
+  key t082g.fegru as FieldGroup,
+      
+      anka.felei as FieldLayout,
+      t082g.fnein as FieldIsOff,
+      
+      -- Specific field checks
+      case t082g.fegru
+        when '07' then t082g.fnein  -- Main Description
+        when '37' then t082g.fnein  -- Note
+        when '04' then t082g.fnein  -- Inventory Number
+        when '75' then t082g.fnein  -- Serial Number
+        when '19' then t082g.fnein  -- Room
+        when '14' then t082g.fnein  -- License Plate
+        else ''
+      end as FieldOffFlag
+}
+where t082g.fegtb = 'A'
+
+
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_ASSET_MASTER'
+@AbapCatalog.compiler.compareFilter: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Asset Master Data for Goods Receipt'
+@VDM.viewType: #COMPOSITE
+@ObjectModel.usageType.dataClass: #MASTER
+@ObjectModel.usageType.serviceQuality: #B
+
+define view ZI_ZLFC_GR_AssetMasterData
+  as select from anla
+    inner join   anlz on  anlz.bukrs = anla.bukrs
+                      and anlz.anln1 = anla.anln1
+                      and anlz.anln2 = anla.anln2
+    left outer join anlh on  anlh.bukrs = anla.bukrs
+                         and anlh.anln1 = anla.anln1
+{
+  key anla.bukrs    as CompanyCode,
+  key anla.anln1    as AssetNumber,
+  key anla.anln2    as SubNumber,
+      
+      anla.anlkl    as AssetClass,
+      anla.invzu    as InventoryNote,
+      anla.invnr    as InventoryNumber,
+      anla.sernr    as SerialNumber,
+      anlh.anlhtxt  as AssetDescription,
+      
+      anlz.kostl    as CostCenter,
+      anlz.stort    as Location,
+      anlz.raumn    as Room,
+      anlz.kfzkz    as LicensePlateNumber,
+      anlz.bdatu    as ValidFrom,
+      anlz.adatu    as ValidTo,
+      
+      -- For current date filtering
+      case when anlz.bdatu >= $session.system_date 
+           and anlz.adatu <= $session.system_date
+           then 'X'
+           else ''
+      end as IsCurrentlyValid
+}
+
+
+
+
+
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Goods Receipt Documents'
+@Metadata.ignorePropagatedAnnotations: true
+@AbapCatalog.sqlViewName: 'ZV_GR_DOCUMENTS'
+@VDM.viewType: #COMPOSITE
+
+define view ZI_GR_GoodsReceiptDocs
+  as select from mkpf
+    inner join mseg on  mseg.mblnr = mkpf.mblnr
+                    and mseg.mjahr = mkpf.mjahr
+{
+  key mkpf.mblnr      as MaterialDocument,
+  key mkpf.mjahr      as DocumentYear,
+  key mseg.zeile      as DocumentItem,
+      
+      mkpf.blart      as DocumentType,
+      mkpf.bldat      as DocumentDate,
+      mkpf.budat      as PostingDate,
+      mkpf.usnam      as UserName,
+      mkpf.xblnr      as ReferenceDocument,
+      mkpf.bktxt      as HeaderText,
+      
+      mseg.bwart      as MovementType,
+      mseg.shkzg      as DebitCreditIndicator,
+      mseg.matnr      as Material,
+      mseg.werks      as Plant,
+      mseg.lgort      as StorageLocation,
+      
+      mseg.ebeln      as PurchaseOrder,
+      mseg.ebelp      as PurchaseOrderItem,
+      
+      @Semantics.quantity.unitOfMeasure: 'EntryUnit'
+      mseg.menge      as Quantity,
+      mseg.meins      as EntryUnit,
+      
+      @Semantics.quantity.unitOfMeasure: 'OrderUnit'
+      mseg.bpmng      as QuantityInOrderUnit,
+      mseg.bprme      as OrderUnit,
+      
+      @Semantics.amount.currencyCode: 'Currency'
+      mseg.dmbtr      as AmountInLocalCurrency,
+      mseg.waers      as Currency,
+      
+      -- Reversal information
+      mseg.smbln      as ReversalDocument,
+      mseg.sjahr      as ReversalYear,
+      mseg.smblp      as ReversalItem,
+      
+      case when mseg.smbln != ''
+           then 'X'
+           else ''
+      end as IsReversed,
+      
+      -- Adjusted quantity (negative for cancellations)
+      case when mseg.shkzg = 'H'
+           then mseg.menge * -1
+           else mseg.menge
+      end as AdjustedQuantity
+}
+
+
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'PO Asset Assignments for GR'
+@Metadata.ignorePropagatedAnnotations: true
+@AbapCatalog.sqlViewName: 'ZV_PO_ASSETS_GR'
+@VDM.viewType: #BASIC
+
+define view ZI_GR_POAssetAssignments
+  as select from ekkn
+    inner join ekko on ekkn.ebeln = ekko.ebeln
+{
+  key ekkn.ebeln as PurchaseOrder,
+  key ekkn.ebelp as PurchaseOrderItem,
+  key ekkn.zekkn as AccountAssignmentNumber,
+      
+      ekkn.anln1 as AssetNumber,
+      ekkn.anln2 as SubNumber,
+      ekko.bukrs as CompanyCode,
+      ekkn.kokrs as ControllingArea,
+      ekkn.kostl as CostCenter,
+      ekkn.aufnr as InternalOrder,
+      ekkn.ps_psp_pnr as WBSElement
+}
+where anln1 != ''
+
+
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_GR_PO_MAIN'
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Complete Purchase Order Data for GR'
+@VDM.viewType: #COMPOSITE
+@ObjectModel.usageType.dataClass: #TRANSACTIONAL
+@ObjectModel.usageType.serviceQuality: #A
+
+define view ZI_ZLFC_GR_POComplete
+  as select from ZI_ZLFC_GR_PurchaseOrderHeader as Header
+    left outer join ZI_ZLFC_GR_PurchaseOrderItems as Items 
+      on Items.PurchaseOrder = Header.PurchaseOrder
+    left outer join ZI_GR_POAssetAssignments as Assets
+      on Assets.PurchaseOrder = Header.PurchaseOrder    
+    association [0..*] to ZI_ZLFC_GR_PurchaseOrderItems as _Items 
+      on _Items.PurchaseOrder = Header.PurchaseOrder
+    association [0..*] to ZI_GR_POAssetAssignments as _Assets
+      on _Assets.PurchaseOrder = Header.PurchaseOrder
+    association [0..*] to ZI_GR_PurchaseOrderHistory as _History
+      on _History.PurchaseOrder = Header.PurchaseOrder
+{
+  key Header.PurchaseOrder,
+      
+      Header.CompanyCode,
+      Header.DocumentType,
+      Header.Vendor,
+      Header.VendorName,
+      Header.Currency,
+      Header.DocumentDate,
+      Header.CreatedBy,
+      
+      -- Status
+      Header.IsComplete,
+      Header.IsApproved,
+      Header.IsStandardPO,
+      Header.IsMyFiEnabled,
+      
+      -- Calculated total value
+      @Semantics.amount.currencyCode: 'Currency'
+      sum(case when Items.DeletionIndicator != 'L' 
+               then Items.EffectiveValue 
+               else cast(0 as abap.curr(15,2))
+          end) as TotalValue,
+          
+      -- Asset count
+      count(distinct Assets.AssetNumber) as AssetCount,
+                      
+      -- Available items count
+      sum(case when Items.AvailableForGR = 'X' 
+               then 1 
+               else 0 
+          end) as AvailableItemsCount,          
+          
+      -- Associations
+      _Items,
+      _Assets,
+      _History
+}
+group by Header.PurchaseOrder, Header.CompanyCode, Header.DocumentType,
+         Header.Vendor, Header.VendorName, Header.Currency,
+         Header.DocumentDate, Header.CreatedBy, Header.IsComplete,
+         Header.IsApproved, Header.IsStandardPO, Header.IsMyFiEnabled
+
+
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_PO_HISTORY_GR'
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Purchase Order History for GR'
+@VDM.viewType: #COMPOSITE
+
+define view ZI_GR_PurchaseOrderHistory
+  as select from ekbe
+    inner join ekpo on ekbe.ebeln = ekpo.ebeln 
+                   and ekbe.ebelp = ekpo.ebelp  
+{
+  key ekbe.ebeln           as PurchaseOrder,
+  key ekbe.ebelp           as PurchaseOrderItem,
+  key ekbe.zekkn           as AccountAssignmentNumber,
+  key ekbe.vgabe           as TransactionType,
+  key ekbe.gjahr           as FiscalYear,
+  key ekbe.belnr           as DocumentNumber,
+  key ekbe.buzei           as DocumentItem,
+      
+      ekbe.bewtp           as POHistoryCategory,
+      ekbe.bwart           as MovementType,
+      ekbe.budat           as PostingDate,
+      
+      @Semantics.quantity.unitOfMeasure: 'Unit'
+      ekbe.menge           as Quantity,
+      ekpo.meins           as Unit,
+      
+      @Semantics.quantity.unitOfMeasure: 'OrderUnit'  
+      ekbe.bpmng           as QuantityInOrderUnit,
+      ekpo.bprme           as OrderUnit,
+      
+      @Semantics.amount.currencyCode: 'Currency'
+      ekbe.dmbtr           as AmountInLocalCurrency,
+      ekbe.waers           as Currency,
+      
+      @Semantics.amount.currencyCode: 'Currency'
+      ekbe.wrbtr           as AmountInDocumentCurrency,
+      
+      ekbe.shkzg           as DebitCreditIndicator,
+      ekbe.xblnr           as ReferenceDocument,
+      
+      -- Material document reference
+      ekbe.lfgja           as MaterialDocumentYear,
+      ekbe.lfbnr           as MaterialDocument,
+      ekbe.lfpos           as MaterialDocumentItem,
+      
+      -- Aggregated quantities by type
+      case ekbe.vgabe
+        when '1' then ekpo.menge  -- Goods Receipt
+        else 0
+      end as GoodsReceiptQuantity,
+      
+      case ekbe.vgabe
+        when '2' then ekpo.menge  -- Invoice Receipt
+        else 0
+      end as InvoiceQuantity
+}
+
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_PO_GR_QTY'
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'PO Goods Receipt Quantities'
+define view ZI_ZLFC_GR_POReceivedQty
+  as select from ekbe
+    inner join ekpo on ekbe.ebeln = ekpo.ebeln 
+                   and ekbe.ebelp = ekpo.ebelp
+{
+  key ekbe.ebeln as PurchaseOrder,
+  key ekbe.ebelp as PurchaseOrderItem,
+  @Semantics.quantity.unitOfMeasure: 'OrderUnit'
+  sum(ekbe.menge) as DeliveredQuantity,
+  ekpo.meins as OrderUnit  -- Using unit from EKPO for consistency
+}
+where ekbe.vgabe = '1' -- Goods Receipt
+group by ekbe.ebeln, ekbe.ebelp, ekpo.meins
+
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_PO_HEADER_GR'
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Purchase Order Header for GR'
+@VDM.viewType: #COMPOSITE
+
+define view ZI_ZLFC_GR_PurchaseOrderHeader
+  as select from ekko
+    left outer join lfa1 on lfa1.lifnr = ekko.lifnr
+    
+    -- Define association to items
+    association [0..*] to ekpo as _Items
+        on _Items.ebeln = ekko.ebeln
+
+    -- Define association to vendor
+    association [0..1] to lfa1 as _Vendor
+        on _Vendor.lifnr = ekko.lifnr         
+{
+  key ekko.ebeln      as PurchaseOrder,
+      
+      ekko.bukrs      as CompanyCode,
+      ekko.bsart      as DocumentType,
+      ekko.bstyp      as DocumentCategory,
+      ekko.lifnr      as Vendor,
+      lfa1.name1      as VendorName,
+      ekko.waers      as Currency,
+      ekko.bedat      as DocumentDate,
+      ekko.aedat      as CreatedOn,
+      ekko.ernam      as CreatedBy,
+      
+      -- Status flags
+      ekko.memory     as OnHold,
+      ekko.frgrl      as ReleaseNotComplete,
+      ekko.frgke      as ReleaseIndicator,
+      ekko.frgzu      as ReleaseStatus,
+      
+      -- Derived fields
+      case when ekko.memory = ''
+           then 'X'
+           else ''
+      end as IsComplete,
+      
+      case when ekko.frgrl = ''
+           then 'X'
+           else ''
+      end as IsApproved,
+      
+      case when ekko.bsart = 'NB'
+           then 'X'
+           else ''
+      end as IsStandardPO,
+      
+      -- All standard POs are MyFi enabled
+      case when ekko.bsart = 'NB'
+           then 'X'
+           else ''
+      end as IsMyFiEnabled,
+      
+      -- Associations
+      _Items,
+      _Vendor
+}
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_PO_ITEMS_GR'
+@AbapCatalog.dataMaintenance: #RESTRICTED
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Purchase Order Items for GR'
+@VDM.viewType: #COMPOSITE
+
+define view ZI_ZLFC_GR_PurchaseOrderItems
+  as select from ekpo
+    inner join ekko on ekko.ebeln = ekpo.ebeln
+    left outer join ZI_ZLFC_GR_POReceivedQty as gr 
+      on  gr.PurchaseOrder = ekpo.ebeln
+      and gr.PurchaseOrderItem = ekpo.ebelp
+{
+  key ekpo.ebeln      as PurchaseOrder,
+  key ekpo.ebelp      as PurchaseOrderItem,
+      
+      ekpo.txz01      as ItemDescription,
+      ekpo.matnr      as Material,
+      ekpo.werks      as Plant,
+      ekpo.lgort      as StorageLocation,
+      ekpo.matkl      as MaterialGroup,
+      
+      @Semantics.quantity.unitOfMeasure: 'OrderUnit'
+      ekpo.menge      as OrderQuantity,
+      ekpo.meins      as OrderUnit,
+      
+      @Semantics.amount.currencyCode: 'Currency'
+      ekpo.netpr      as NetPrice,
+      ekpo.peinh      as PriceUnit,
+      @Semantics.amount.currencyCode: 'Currency'
+      ekpo.netwr      as NetValue,
+      @Semantics.amount.currencyCode: 'Currency'
+      ekpo.effwr      as EffectiveValue,
+      ekko.waers      as Currency,  -- Currency from EKKO header
+      
+      ekpo.mwskz      as TaxCode,
+      ekpo.webre      as GRBasedIV,
+      ekpo.knttp      as AccountAssignmentCategory,
+      ekpo.loekz      as DeletionIndicator,
+      ekpo.elikz      as DeliveryCompleted,
+      ekpo.erekz      as FinalInvoice,
+      ekpo.repos      as InvoiceReceipt,
+      
+      -- GR quantities
+      @Semantics.quantity.unitOfMeasure: 'OrderUnit'
+      coalesce(gr.DeliveredQuantity, cast(0 as abap.dec(13,3))) as DeliveredQuantity,
+      
+      @Semantics.quantity.unitOfMeasure: 'OrderUnit'
+      ekpo.menge - coalesce(gr.DeliveredQuantity, cast(0 as abap.dec(13,3))) as OpenQuantity,
+      
+      -- Flags for GR processing
+      case when ekpo.repos = ''  -- GR indicator set
+           and ekpo.elikz = ''  -- Not delivery completed
+           and ekpo.loekz = ''  -- Not deleted
+           and ekpo.erekz = ''  -- Not final invoiced
+           and ekpo.knttp != 'X' -- Not unknown account assignment
+           then 'X'
+           else ''
+      end as AvailableForGR,
+      
+      case when ekpo.knttp = 'A'
+           then 'X'
+           else ''
+      end as IsAssetItem
+}
+
+
+
+
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@Metadata.ignorePropagatedAnnotations: true
+@AbapCatalog.sqlViewName: 'ZV_TAX_CONFIG_GR'
+@EndUserText.label: 'Tax Configuration for GR'
+@VDM.viewType: #BASIC
+
+define view ZI_ZLFC_TaxConfiguration
+  as select from t007a
+    inner join a003 on a003.mwskz = t007a.mwskz
+    inner join konp on konp.knumh = a003.knumh 
+                   and konp.kopos = '01'
+{
+  key t007a.mwskz     as TaxCode,
+  key t007a.kalsm     as TaxProcedure,
+      
+      konp.kbetr      as TaxAmount,
+      cast (konp.kbetr as abap.fltp) / cast (1000 as abap.fltp) as TaxRate,
+      //division( konp.kbetr, 1000, 3 ) as TaxRate,
+      konp.konwa      as ConditionCurrency,
+      
+      a003.kschl      as ConditionType,
+      a003.aland      as Country
+}
+where t007a.kalsm = 'TAXAU'
+  and t007a.mwskz like 'P%'
+  //and ( a003.kschl = 'ZZ02' or a003.kschl = 'ZZ04' )
+  and a003.aland = 'AU'
+
+
+
+
+
+@AbapCatalog.sqlViewName: 'ZV_USER_EMP_GR'
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'User and Employee Data'
+@VDM.viewType: #COMPOSITE
+
+define view ZI_ZLFC_UserEmployeeData
+  as select from usr21
+    left outer join adrp on adrp.persnumber = usr21.persnumber
+    left outer join pa0105 on pa0105.usrid = usr21.bname
+                           and pa0105.subty = '0001'
+                           and pa0105.begda <= $session.system_date
+                           and pa0105.endda >= $session.system_date
+    left outer join pa0001 on pa0001.pernr = pa0105.pernr
+                           and pa0001.begda <= $session.system_date
+                           and pa0001.endda >= $session.system_date
+    left outer join pa0002 on pa0002.pernr = pa0105.pernr
+                           and pa0002.begda <= $session.system_date
+                           and pa0002.endda >= $session.system_date
+{
+  key usr21.bname     as UserName,
+      
+      -- User master data
+      adrp.name_text  as FullNameFromUser,
+      adrp.name_first as FirstName,
+      adrp.name_last  as LastName,
+      
+      -- Employee data
+      pa0105.pernr    as EmployeeNumber,
+      pa0001.bukrs    as CompanyCode,
+      pa0001.orgeh    as OrganizationalUnit,
+      pa0001.kostl    as CostCenter,
+      
+      -- Employee name details
+      pa0002.nachn    as EmployeeLastName,
+      pa0002.vorna    as EmployeeFirstName,
+      pa0002.titel    as Title,
+      
+      -- Combined name
+      concat_with_space(
+        concat_with_space(pa0002.titel, pa0002.vorna, 1),
+        pa0002.nachn, 1
+      ) as FullNameFromHR,
+      
+      -- Use HR name if available, otherwise user master
+      case when pa0002.pernr is not null
+           then concat_with_space(
+                  concat_with_space(pa0002.titel, pa0002.vorna, 1),
+                  pa0002.nachn, 1
+                )
+           else adrp.name_text
+      end as DisplayName
+}
+
+
+

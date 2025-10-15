@@ -1,0 +1,293 @@
+<mvc:View controllerName="au.gov.defence.roman.zfss.gr.controller.PO"
+	height="100%"
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.ui.layout.form"
+	xmlns:html="http://www.w3.org/1999/xhtml">
+	<Page
+		class="sapUiContentPadding sapUiResponsivePadding--header sapUiResponsivePadding--footer"
+		showHeader="{= !${componentModel>/inFLP}}" busy="{viewModel>/busy}"
+		busyIndicatorDelay="{viewModel>/delay}" showFooter="true"
+		floatingFooter="true">
+		<customHeader>
+			<Bar>
+				<contentLeft>
+					<Button icon="sap-icon://nav-back" press="._onNavBack"
+						tooltip="{i18n>navBackButtonTooltip}" enabled="{= !${viewModel>/isMfp}}" />
+					<Button icon="sap-icon://home" press="._onNavHome"
+						tooltip="{i18n>navHomeButtonTooltip}" />
+				</contentLeft>
+				<contentMiddle>
+					<Title text="{i18n>poPageTitle}" />
+				</contentMiddle>
+				<contentRight>
+					<Button icon="sap-icon://sys-help" press=".onNavHelp"
+						tooltip="{i18n>navHelpButtonTooltip}" />
+					<Button icon="sap-icon://customer" text="{userModel>/FullName}"
+						press=".onToggleUserPopover" tooltip="{i18n>userDetailsButtonTooltip}" />
+					<Button icon="sap-icon://overflow" press=".onOverflow"
+						tooltip="{i18n>overflowButtonTooltip}" enabled="false" />
+				</contentRight>
+			</Bar>
+		</customHeader>
+		<content>
+			<VBox>
+				<VBox>
+					<f:Form editable="false" class="sapUiSmallMarginBottom">
+						<f:title>
+							<core:Title text="{i18n>poDetailsTitle}" />
+						</f:title>
+						<f:layout>
+							<f:ResponsiveGridLayout columnsXL="{=${viewModel>/isVim} ? 3 : 2}"
+								columnsL="{=${viewModel>/isVim} ? 3 : 2}" columnsM="2"
+								singleContainerFullSize="true" />
+						</f:layout>
+						<f:formContainers>
+							<f:FormContainer>
+								<f:formElements>
+									<f:FormElement label="{i18n>poLabel}">
+										<f:fields>
+											<Link
+												text="{path: 'PoNumber', formatter: '.formatter.removeLeadingZero'}"
+												press=".onPOLinkPress" tooltip="View Purchase Order (opens in new tab)" />
+										</f:fields>
+									</f:FormElement>
+									<f:FormElement label="{i18n>poValueLabel}">
+										<f:fields>
+											<ObjectNumber emphasized="false"
+												number="{parts: [{path: 'TotalValue'}, {path:'Currency'}], type:'sap.ui.model.type.Currency', formatOptions:{showMeasure: false}}"
+												unit="{Currency}" />
+										</f:fields>
+									</f:FormElement>
+								</f:formElements>
+							</f:FormContainer>
+							<f:FormContainer>
+								<f:formElements>
+									<f:FormElement label="{i18n>vendorLabel}">
+										<f:fields>
+											<Link text="{Vendor} ({VendorName})" press=".onVendorLinkPress" />
+										</f:fields>
+									</f:FormElement>
+								</f:formElements>
+							</f:FormContainer>
+							<f:FormContainer visible="{viewModel>/isVim}">
+								<f:formElements>
+									<f:FormElement>
+										<f:fields>
+											<Label text="{i18n>vimInvoiceAmount}:" textAlign="Right"
+												wrapping="false" />
+											<ObjectNumber emphasized="false"
+												number="{parts: [{path: 'VimInvoiceAmount'}, {path:'VimCurrency'}], type:'sap.ui.model.type.Currency', formatOptions:{showMeasure: false}}"
+												unit="{VimCurrency}" />
+										</f:fields>
+									</f:FormElement>
+									<f:FormElement>
+										<f:fields>
+											<Label text="{i18n>vimUnmatchedAmount}:" textAlign="Right"
+												wrapping="false" />
+											<ObjectNumber emphasized="false"
+												number="{parts: [{path: 'VimBalance'}, {path:'VimCurrency'}], type:'sap.ui.model.type.Currency', formatOptions:{showMeasure: false}}"
+												unit="{VimCurrency}" />
+										</f:fields>
+									</f:FormElement>
+								</f:formElements>
+							</f:FormContainer>
+						</f:formContainers>
+					</f:Form>
+				</VBox>
+				<VBox>
+					<Table growing="false" showNoData="false">
+						<headerToolbar>
+							<OverflowToolbar>
+								<Title text="{i18n>itemsTableTitle} ({viewModel>/itemsCount})"
+									level="H2" />
+								<core:Icon src="sap-icon://sys-help-2"
+									class="sapMBtnCustomIcon sapMBtnIcon sapMBtnIconLeft sapUiIcon sapUiIconMirrorInRTL"
+									hoverColor="Contrast" press="" tooltip="{i18n>poDetailsMessage}">
+								</core:Icon>
+							</OverflowToolbar>
+						</headerToolbar>
+						<columns>
+							<Column hAlign="Left">
+								<Label text="{i18n>itemLabel}" textAlign="Left" wrapping="true" />
+							</Column>
+							<Column hAlign="Left">
+								<Label text="{i18n>itemDescriptionLabel}" textAlign="Left"
+									wrapping="true" />
+							</Column>
+							<Column hAlign="Right">
+								<Label text="{i18n>itemQuantityLabel}" textAlign="Center"
+									wrapping="true" />
+							</Column>
+							<Column hAlign="Right">
+								<Label text="{i18n>itemUnitPriceLabel}" textAlign="Center"
+									wrapping="true" />
+							</Column>
+							<Column hAlign="Center">
+								<Label text="{i18n>itemTaxCodeLabel}" textAlign="Center"
+									wrapping="true" />
+							</Column>
+							<Column hAlign="Right">
+								<Label text="{i18n>itemValueLabel}" textAlign="Right"
+									wrapping="true" />
+							</Column>
+							<Column hAlign="Right">
+								<Label text="{i18n>itemQuantityRemainingLabel}" textAlign="Right"
+									wrapping="true" />
+							</Column>
+						</columns>
+					</Table>
+					<ScrollContainer class="sapUiSmallMarginBottom"
+						vertical="true" focusable="true" height="{viewModel>/itemsScrollHeight}">
+						<Table id="itemsTable" alternateRowColors="true" items="{itemModel>/}"
+							growing="false" mode="SingleSelectMaster">
+							<columns>
+								<Column hAlign="Left">
+								</Column>
+								<Column hAlign="Left">
+								</Column>
+								<Column hAlign="Right">
+								</Column>
+								<Column hAlign="Right">
+								</Column>
+								<Column hAlign="Center">
+								</Column>
+								<Column hAlign="Right">
+								</Column>
+								<Column hAlign="Right">
+								</Column>
+							</columns>
+							<items>
+								<ColumnListItem>
+									<cells>
+										<Text
+											text="{path:'itemModel>PoItem', formatter: '.formatter.removeLeadingZero'}" />
+										<Text text="{itemModel>ShortText}" />
+										<Text
+											text="{path: 'itemModel>Quantity', type: 'sap.ui.model.odata.type.Decimal', formatOptions: {decimals: 3}, constraints:{scale: 'variable'}}" />
+										<Text
+											text="{parts: [{path: 'itemModel>NetPrice'}, {path:'viewModel>/poCurrency'}], formatter: '.formatter.netPriceFormatter'}" />
+										<Text text="{itemModel>TaxCode}" />
+										<Text
+											text="{parts: [{path: 'itemModel>EffectiveValue'}, {path:'viewModel>/poCurrency'}], type:'sap.ui.model.type.Currency', formatOptions:{showMeasure: false}}" />
+										<Text
+											text="{path: 'itemModel>QuantityRemaining', type: 'sap.ui.model.odata.type.Decimal', formatOptions: {decimals: 3}, constraints:{scale: 'variable'}}" />
+									</cells>
+								</ColumnListItem>
+							</items>
+						</Table>
+					</ScrollContainer>
+					<Table id="movementsTable" class="sapUiSmallMarginTop"
+						items="{path: 'movtModel>/', templateShareable: false}" mode="SingleSelectMaster">
+						<headerToolbar>
+							<OverflowToolbar>
+								<Title text="{i18n>movtTableTitle} ({viewModel>/movtLineCount})" />
+								<ToolbarSpacer />
+								<Label design="Bold"
+									text="{i18n>totalExTax}: {parts: [{path: 'viewModel>/movtTotal'}, {path:'viewModel>/poCurrency'}],
+                  formatter: '.formatter.netPriceFormatter'}" />
+								<Label class="sapUiLargeMarginBegin" design="Bold"
+									text="{i18n>totalIncTax}: {parts: [{path: 'viewModel>/movtTotalIncTax'}, {path:'viewModel>/poCurrency'}],
+                  formatter: '.formatter.netPriceFormatter'}" />
+								<ToolbarSpacer />
+								<Button icon="sap-icon://add" text="{i18n>movtAddButtonText}"
+									tooltip="{i18n>movtAddButtonTooltip}" type="Emphasized" press=".onAddMovtLine"
+									enabled="{viewModel>/bound}" />
+							</OverflowToolbar>
+						</headerToolbar>
+						<columns>
+							<Column hAlign="Left" width="7em">
+								<Label text="{i18n>movtRecLabel}" textAlign="Left"
+									wrapping="true" />
+							</Column>
+							<Column hAlign="Left">
+								<Label text="{i18n>movtItemLabel}" textAlign="Left"
+									wrapping="true" required="true" tooltip="{i18n>poItemSelectTooltip}" />
+							</Column>
+							<Column hAlign="Left">
+								<Label text="{i18n>movtHeaderTextLabel}" textAlign="Center"
+									wrapping="true" tooltip="{i18n>headerTextTooltip}" />
+							</Column>
+							<Column hAlign="Left">
+								<Label text="{i18n>movtDelNoteLabel}" textAlign="Center"
+									wrapping="true" tooltip="{i18n>delNoteTooltip}" />
+							</Column>
+							<Column hAlign="Center" width="5em" visible="{HasAsset}">
+								<Label text="{i18n>movtAssetDetailLabel}" textAlign="Center"
+									wrapping="true" tooltip="{i18n>assetDetailTooltip}" />
+							</Column>
+							<Column hAlign="Left">
+								<Label text="{i18n>movtQtyRecLabel}" textAlign="Center"
+									wrapping="true" required="true" tooltip="{i18n>qtyTooltip}" />
+							</Column>
+							<Column hAlign="Left">
+								<Label text="{i18n>movtDelDateLabel}" textAlign="Center"
+									wrapping="true" required="true" tooltip="{i18n>movtDateTooltip}" />
+							</Column>
+							<Column hAlign="Center" width="7em">
+								<Label text="{i18n>movtActionsLabel}" textAlign="Center"
+									wrapping="true" />
+							</Column>
+						</columns>
+						<items>
+							<ColumnListItem highlight="{movtModel>LineStatus}">
+								<cells>
+									<Text text="{movtModel>MovtId}" />
+									<ComboBox name="poItemComboBox" valueState="{movtModel>PoItemVs}"
+										change=".selectMovtPoItem" placeholder="{i18n>ItemSelectPlaceholder}"
+										selectedKey="{movtModel>PoItem}" items="{ path: 'itemModel>/', templateShareable: false}">
+										<core:ListItem key="{itemModel>PoItem}"
+											text="{path:'itemModel>PoItem', formatter: '.formatter.removeLeadingZero'}" />
+									</ComboBox>
+									<Input fieldGroupIds="inputs" editable="{= ${viewModel>/isVim} !== true}"
+										change="._onFieldChange"
+										maxLength="25" placeholder="{i18n>FreetextPlaceholder}" value="{movtModel>HeaderTxt}"></Input>
+									<Input fieldGroupIds="inputs" editable="{= ${viewModel>/isVim} !== true}"
+										change="._onFieldChange"
+										maxLength="16" value="{movtModel>RefDocNo}" placeholder="{i18n>FreetextPlaceholder}"></Input>
+									<HBox visible="{HasAsset}" alignItems="Center"
+										justifyContent="SpaceAround">
+										<items>
+											<Button icon="sap-icon://form" tooltip="{i18n>assetDetailButtonTooltip}"
+												press=".onAssetDetail" enabled="{movtModel>IsAsset}" />
+										</items>
+									</HBox>
+									<Input value="{movtModel>EntryQnt}" placeholder="{i18n>EntryQntPlaceholder}"
+										valueState="{movtModel>EntryQntVs}" liveChange=".onLiveChangeQty"
+										change=".refreshMovts"></Input>
+									<DatePicker id="movtDatePicker"
+										value="{path: 'movtModel>DocDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern:'dd.MM.yyyy', strictParsing:true, UTC: true} }"
+										valueFormat="dd.MM.yyyy" displayFormat="dd.MM.yyyy"
+										change="._onFieldChange"
+										valueState="{movtModel>DocDateVs}" />
+									<HBox alignItems="Center" justifyContent="SpaceAround">
+										<items>
+											<Button icon="sap-icon://copy" tooltip="{i18n>movtCopyButtonText}"
+												press=".onCopyMovtLine" enabled="{viewModel>/bound}" />
+											<Button icon="sap-icon://delete" type="Reject"
+												tooltip="{i18n>movtDeleteButtonText}" press=".onDeleteMovtLine"
+												enabled="{viewModel>/bound}" />
+										</items>
+									</HBox>
+								</cells>
+							</ColumnListItem>
+						</items>
+					</Table>
+				</VBox>
+			</VBox>
+		</content>
+		<footer>
+			<OverflowToolbar>
+				<Button id="messagesButton" icon="{viewModel>/messageButtonIcon}"
+					enabled="true" text="{=${message>/}.length === 0 ? '' : ${message>/}.length}"
+					type="{viewModel>/messageButtonType}" press=".onMessagePopoverPress">
+				</Button>
+				<ToolbarSpacer />
+				<Button press=".onSubmit" type="Emphasized" text="{i18n>poGrSubmitButtonText}"
+					tooltip="{i18n>poGrSubmitButtonTooltip}"
+					enabled="{= ${disableModel>/DisableFlag} !== true &amp;&amp; ${viewModel>/bound} &amp;&amp; ${viewModel>/movtLineCount} > 0}" />
+			</OverflowToolbar>
+		</footer>
+	</Page>
+</mvc:View>

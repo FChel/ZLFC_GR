@@ -1,0 +1,12 @@
+<mvc:View
+    controllerName="au.gov.defence.roman.zfss.gr.controller.App"
+    displayBlock="true"
+    height="100%"    
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc">
+    
+    <App id="app"
+        busy="{appView>/busy}"
+        busyIndicatorDelay="{appView>/delay}">
+    </App>
+</mvc:View>

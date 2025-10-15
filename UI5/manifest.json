@@ -1,0 +1,196 @@
+{
+  "_version": "1.12.0",
+  "sap.app": {
+    "id": "au.gov.defence.roman.zfss.gr",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "resources": "resources.json",
+    "dataSources": {
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZLFC_GR_SRV/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "2.0"
+        }
+      },
+      "commonService": {
+        "uri": "/sap/opu/odata/sap/ZLFC_COAS_SRV",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "2.0"
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "sap-icon://task",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "rootView": {
+      "viewName": "au.gov.defence.roman.zfss.gr.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "app"
+    },
+    "dependencies": {
+      "minUI5Version": "1.61.2",
+      "libs": {
+        "sap.ui.core": {},
+        "sap.m": {},
+        "sap.f": {},
+        "sap.ui.unified": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "au.gov.defence.roman.zfss.gr.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "useBatch": false,
+          "defaultCountMode": "Inline",
+          "defaultBindingMode": "TwoWay"
+        }
+      },
+      "common": {
+        "dataSource": "commonService",
+        "preload": true,
+        "settings": {
+          "useBatch": false,
+          "defaultCountMode": "Inline"
+        }
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "viewPath": "au.gov.defence.roman.zfss.gr.view",
+        "controlId": "app",
+        "controlAggregation": "pages",
+        "bypassed": {
+          "target": [
+            "notFound"
+          ]
+        },
+        "async": true
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "po0",
+          "target": [
+            "po0"
+          ]
+        },
+        {
+          "pattern": "PO/{objectId}",
+          "name": "po1",
+          "target": [
+            "po1"
+          ]
+        },
+        {
+          "pattern": "VIM/{objectId}",
+          "name": "vim",
+          "target": [
+            "po1"
+          ]
+        },
+        {
+          "pattern": "GR/",
+          "name": "gr0",
+          "target": [
+            "gr0"
+          ]
+        },
+        {
+          "pattern": "GR/{objectId}",
+          "name": "gr1",
+          "target": [
+            "gr1"
+          ]
+        },
+        {
+          "pattern": "GRX/",
+          "name": "grx0",
+          "target": [
+            "grx0"
+          ]
+        },
+        {
+          "pattern": "GRX/{objectId}",
+          "name": "grx1",
+          "target": [
+            "grx1"
+          ]
+        }
+      ],
+      "targets": {
+        "po0": {
+          "viewName": "PO",
+          "viewId": "po",
+          "viewLevel": 1
+        },
+        "po1": {
+          "viewName": "PO",
+          "viewId": "po",
+          "viewLevel": 2
+        },
+        "gr0": {
+          "viewName": "GR",
+          "viewId": "gr",
+          "viewLevel": 1
+        },
+        "gr1": {
+          "viewName": "GR",
+          "viewId": "gr",
+          "viewLevel": 1
+        },
+        "grx0": {
+          "viewName": "GR",
+          "viewId": "gr",
+          "viewLevel": 1
+        },
+        "grx1": {
+          "viewName": "GR",
+          "viewId": "gr",
+          "viewLevel": 1
+        },
+        "objectNotFound": {
+          "viewName": "ObjectNotFound",
+          "viewId": "objectNotFound"
+        },
+        "notFound": {
+          "viewName": "NotFound",
+          "viewId": "notFound"
+        }
+      }
+    }
+  }
+}

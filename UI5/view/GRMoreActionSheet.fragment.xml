@@ -1,0 +1,7 @@
+<core:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core">
+  <ActionSheet title="Choose Your Action" placement="Vertical">
+    <Button press=".onCancel" text="{i18n>grCancelButtonText}" tooltip="{i18n>grCancelButtonTooltip}" enabled="{= ${disableModel>/DisableFlag} !== true}"/>
+  </ActionSheet>
+</core:FragmentDefinition>

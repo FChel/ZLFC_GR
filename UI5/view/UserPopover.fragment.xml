@@ -1,0 +1,19 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+	<ResponsivePopover
+		showHeader="false"
+		placement="Bottom"
+		class="sapUiContentPadding">
+		<content>
+			<VBox>
+				<HBox>
+					<Label text="{userModel>/FullNameHr}" design="Bold" />
+				</HBox>
+				<HBox class="sapUiTinyMarginTop">
+					<Label text="{i18n>userIdTitle}: {userModel>/UserId}" />
+				</HBox>
+			</VBox>
+		</content>
+	</ResponsivePopover>
+</core:FragmentDefinition>

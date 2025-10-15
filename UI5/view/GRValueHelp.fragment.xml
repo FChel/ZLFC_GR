@@ -1,0 +1,96 @@
+<core:FragmentDefinition
+  xmlns="sap.ui.comp.valuehelpdialog"
+  xmlns:m="sap.m"
+  xmlns:fb="sap.ui.comp.filterbar"
+  xmlns:core="sap.ui.core">
+  <ValueHelpDialog
+    title="{i18n>vhGR}"
+    ok=".onGRValueHelpOkPress"
+    cancel=".onGRValueHelpCancelPress"
+    afterClose=".onGRValueHelpAfterClose"
+    supportMultiselect="false"
+    supportRanges="false"
+    supportRangesOnly="false"
+    key="MatDoc"
+    descriptionKey="MatDoc">
+    <filterBar>
+      <fb:FilterBar id="grVHFB" advancedMode="true" filterBarExpanded="true" search=".onGRFilterBarSearch">
+        <fb:filterGroupItems>
+          <fb:FilterGroupItem
+            groupName="__$INTERNAL$"
+            label="{i18n>vhGR}"
+            name="MatDoc"
+            visibleInFilterBar="true">
+            <fb:control>
+              <m:Input name="MatDoc" placeholder="{i18n>vhPlaceHolderCPNumber}" />
+            </fb:control>
+          </fb:FilterGroupItem>
+          <fb:FilterGroupItem
+            groupName="__$INTERNAL$"
+            label="{i18n>vhPO}"
+            name="PoNumber"
+            visibleInFilterBar="true">
+            <fb:control>
+              <m:Input name="PoNumber" placeholder="{i18n>vhPlaceHolderCPNumber}" />
+            </fb:control>
+          </fb:FilterGroupItem>
+          <fb:FilterGroupItem
+            groupName="__$INTERNAL$"
+            name="Vendor"
+            label="{i18n>vhVendor}"
+            visibleInFilterBar="true">
+            <fb:control>
+              <m:Input name="Vendor" placeholder="{i18n>vhPlaceHolderCPNumber}" />
+            </fb:control>
+          </fb:FilterGroupItem>
+          <fb:FilterGroupItem
+            groupName="__$INTERNAL$"
+            name="VendorNameMC"
+            label="{i18n>vhVendorName}"
+            visibleInFilterBar="true">
+            <fb:control>
+              <m:Input name="VendorNameMC" placeholder="{i18n>vhPlaceHolderCPName}"/>
+            </fb:control>
+          </fb:FilterGroupItem>
+          <fb:FilterGroupItem
+            groupName="__$INTERNAL$"
+            name="Username"
+            label="{i18n>vhUsername}"
+            visibleInFilterBar="true">
+            <fb:control>
+              <m:Input name="Username" placeholder="{i18n>vhPlaceHolderCPUS}" />
+            </fb:control>
+          </fb:FilterGroupItem>
+          <fb:FilterGroupItem
+            groupName="__$INTERNAL$"
+            name="HeaderTxt"
+            label="{i18n>vhHeaderTxt}"
+            visibleInFilterBar="true">
+            <fb:control>
+              <m:Input name="HeaderTxt" placeholder="{i18n>vhPlaceHolderCPHT}" />
+            </fb:control>
+          </fb:FilterGroupItem>
+          <fb:FilterGroupItem
+            groupName="__$INTERNAL$"
+            name="RefDocNo"
+            label="{i18n>vhRefDocNo}"
+            visibleInFilterBar="true">
+            <fb:control>
+              <m:Input name="RefDocNo" placeholder="{i18n>vhPlaceHolderCPRef}" />
+            </fb:control>
+          </fb:FilterGroupItem>
+          <fb:FilterGroupItem
+            groupName="__$INTERNAL$"
+            name="DocDate"
+            label="{i18n>vhDocDate}"
+            visibleInFilterBar="true">
+            <fb:control>
+              <m:DateRangeSelection name="DocDate"
+                valueFormat="dd.MM.yyyy" displayFormat="dd.MM.yyyy" placeholder="" />
+            </fb:control>
+          </fb:FilterGroupItem>
+        </fb:filterGroupItems>
+      </fb:FilterBar>
+    </filterBar>
+  </ValueHelpDialog>
+</core:FragmentDefinition>

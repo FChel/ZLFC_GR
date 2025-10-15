@@ -1,0 +1,156 @@
+<mvc:View
+  height="100%"
+  controllerName="au.gov.defence.roman.zfss.gr.controller.GR"
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:f="sap.ui.layout.form">
+  <Page
+    class="sapUiContentPadding sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer"
+    showHeader="{= !${componentModel>/inFLP}}"
+    busy="{viewModel>/busy}" busyIndicatorDelay="{viewModel>/delay}"
+    showFooter="true" floatingFooter="true">
+    <customHeader>
+      <Bar>
+        <contentLeft>
+          <Button icon="sap-icon://nav-back" press=".onNoGR" tooltip="{i18n>navBackButtonTooltip}" />
+          <Button icon="sap-icon://home" press=".onNavHome" tooltip="{i18n>navHomeButtonTooltip}" />
+        </contentLeft>
+        <contentMiddle>
+          <Title text="{
+            path: 'viewModel>/editMode',
+            formatter: '.formatter.grPageTitle'
+          }" />
+        </contentMiddle>
+        <contentRight>
+          <Button icon="sap-icon://sys-help" press=".onNavHelp" tooltip="{i18n>navHelpButtonTooltip}" />
+          <Button icon="sap-icon://customer" text="{userModel>/FullName}" press=".onToggleUserPopover" tooltip="{i18n>userDetailsButtonTooltip}" />
+                  <Button icon="sap-icon://overflow" press=".onMorePress" tooltip="{i18n>overflowButtonTooltip}" enabled="{viewModel>/canBeCancelled}" />
+        </contentRight>
+      </Bar>
+    </customHeader>
+    <content>
+      <VBox>
+        <f:Form editable="false">
+          <f:title>
+            <core:Title text="{i18n>poDetailsTitle}" />
+          </f:title>
+          <f:layout>
+            <f:ResponsiveGridLayout columnsXL="2" columnsL="2" columnsM="2" singleContainerFullSize="true" />
+          </f:layout>
+          <f:formContainers>
+            <f:FormContainer>
+              <f:formElements>
+                <f:FormElement label="{i18n>poLabel}">
+                  <f:fields>
+                    <FormattedText htmlText="{parts: [{path: 'PoNumber'}, {path:'PoIsMyFi'}], formatter: '.formatter.poLinkHtml'}"/>
+                  </f:fields>
+                </f:FormElement>
+                <f:FormElement label="{i18n>poValueLabel}">
+                  <f:fields>
+                    <ObjectNumber
+                      emphasized="false"
+                      number="{parts: [{path: 'TotalValue'}, {path:'Currency'}], type:'sap.ui.model.type.Currency', formatOptions:{showMeasure: false}}"
+                      unit="{Currency}" />
+                  </f:fields>
+                </f:FormElement>
+                <f:FormElement label="{i18n>vendorLabel}">
+                  <f:fields>
+                    <Text text="{VendorName} ({Vendor})" />
+                  </f:fields>
+                </f:FormElement>
+              </f:formElements>
+            </f:FormContainer>
+            <f:FormContainer>
+              <f:formElements>
+                <f:FormElement label="{i18n>grLabel}">
+                  <f:fields>
+                    <Text text="{MatDoc}" />
+                  </f:fields>
+                </f:FormElement>
+                <f:FormElement label="{i18n>usernameLabel}">
+                  <f:fields>
+                              <Text text="{UsernameFull} ({Username})" />
+                  </f:fields>
+                </f:FormElement>
+              </f:formElements>
+            </f:FormContainer>
+          </f:formContainers>
+        </f:Form>
+        <MessageStrip class="sapUiSmallMarginBeginEnd sapUiSmallMarginTopBottom" type="Information" showIcon="true"
+          text="{i18n>grCancelMessage}" visible="{viewModel>/editMode}" />
+        <Table id="itemsTable"
+          alternateRowColors="true"
+          items="{itemModel>/}"
+          selectionChange="onItemSelectionChanged"
+          growing="false"
+          mode="{=${viewModel>/editMode} ? 'MultiSelect' : 'None'}">
+          <headerToolbar>
+            <OverflowToolbar>
+              <Title text="{i18n>grItemsTableTitle}" level="H2"/>
+            </OverflowToolbar>
+          </headerToolbar>
+          <columns>
+            <Column hAlign="Left" width="9em">
+              <Label text="{i18n>poItemLabel}" textAlign="Center" wrapping="true"/>
+            </Column>
+            <Column hAlign="Left">
+              <Label text="{i18n>poItemTextLabel}" textAlign="Center" wrapping="true"/>
+            </Column>
+            <!--
+            <Column hAlign="Left" visible="{= !${viewModel>/editMode}}">
+              <Label text="{i18n>movtHeaderTextLabel}" textAlign="Center" wrapping="true"/>
+            </Column>
+            <Column hAlign="Left" visible="{viewModel>/editMode}">
+              <Label text="{i18n>movtHeaderTextLabel}" textAlign="Center" wrapping="true"/>
+            </Column>
+             -->
+            <Column hAlign="Left">
+              <Label text="{i18n>movtHeaderTextLabel}" textAlign="Center" wrapping="true"/>
+            </Column>
+            <Column hAlign="Left">
+              <Label text="{i18n>movtDelNoteLabel}" textAlign="Center" wrapping="true"/>
+            </Column>
+            <Column hAlign="Center">
+              <Label text="{i18n>movtQuantityRecLabel}" textAlign="Center" wrapping="true"/>
+            </Column>
+            <Column hAlign="Center">
+              <Label text="{i18n>movtRecDateLabel}" textAlign="Center" wrapping="true"/>
+            </Column>
+          </columns>
+          <items>
+            <ColumnListItem selected="{itemModel>Selected}" highlight="{itemModel>LineStatus}">
+              <cells>
+                <Text text="{path:'itemModel>PoItem', formatter: '.formatter.removeLeadingZero'}"/>
+                <Text text="{itemModel>ShortText}"/>
+                <!--
+                <Text visible="{= !${viewModel>/editMode}}" text="{itemModel>HeaderTxt}"></Text>
+                <Input visible="{viewModel>/editMode}" fieldGroupIds="inputs" maxLength="25" value="{itemModel>HeaderTxt}"></Input>
+                -->
+                <Text text="{itemModel>HeaderTxt}"></Text>
+                <Text text="{itemModel>RefDocNo}"></Text>
+                <Text text="{path: 'itemModel>EntryQnt', type: 'sap.ui.model.odata.type.Decimal', formatOptions: {decimals: 3}, constraints:{scale: 'variable'}}"/>
+                <Text text="{path: 'itemModel>DocDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern:'dd.MM.yyyy', strictParsing:true, UTC: true} }"/>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
+      </VBox>
+    </content>
+    <footer>
+      <OverflowToolbar>
+        <Button id="messagesButton"
+          icon="{viewModel>/messageButtonIcon}"
+          enabled="true"
+          text="{=${message>/}.length === 0 ? '' : ${message>/}.length}"
+          type="{viewModel>/messageButtonType}"
+          visible="{viewModel>/editMode}"
+          press=".onMessagePopoverPress">
+        </Button>
+                <ToolbarSpacer/>
+        <Button press=".onSubmitConfirm" type="Emphasized" text="{i18n>poGrSubmitButtonText}" tooltip="{i18n>poGrSubmitButtonTooltip}"
+          enabled="{= ${disableModel>/DisableFlag} !== true &amp;&amp; ${viewModel>/bound} &amp;&amp; ${viewModel>/selected}}" visible="{viewModel>/editMode}" />
+      </OverflowToolbar>
+    </footer>
+  </Page>
+</mvc:View>
